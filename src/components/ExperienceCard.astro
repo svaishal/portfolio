@@ -1,0 +1,44 @@
+---
+interface Props {
+  company: string;
+  role: string;
+  period: string;
+  current: boolean;
+  achievements: string[];
+}
+
+const { company, role, period, current, achievements } = Astro.props;
+---
+
+<article class="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 hover:border-accent/30 hover:shadow-lg transition-all duration-300">
+  {current && (
+    <div class="absolute top-4 right-4 z-10">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
+      </span>
+    </div>
+  )}
+
+  <div class="space-y-4 relative z-10">
+    <div>
+      <h3 class="text-2xl font-semibold text-neutral-900 group-hover:text-accent transition-colors">{role}</h3>
+      <p class="text-accent font-medium mt-1">{company}</p>
+      <p class="text-sm text-neutral-500 mt-2">{period}</p>
+      {current && (
+        <span class="inline-block mt-2 px-3 py-1 text-xs font-medium bg-accent/10 text-accent rounded-full border border-accent/20">
+          Currently Active
+        </span>
+      )}
+    </div>
+
+    <ul class="space-y-2 text-neutral-600">
+      {achievements.map(achievement => (
+        <li class="flex items-start gap-2">
+          <span class="text-accent mt-1 text-xs">●</span>
+          <span class="text-sm leading-relaxed">{achievement}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</article>

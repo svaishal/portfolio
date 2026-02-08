@@ -1,0 +1,381 @@
+{
+  "personal": {
+    "name": "Vaishal S",
+    "role": "Technical Support Professional",
+    "tagline": "Making technology invisible, one solution at a time",
+    "subtitle": "ERP Intern → Freelance IT Support → MNC Professional",
+    "email": "vaishals@hawklab.in",
+    "github": "svaishal",
+    "linkedin": "https://www.linkedin.com/in/freelancer-vaishal/",
+    "location": "India",
+    "yearsExperience": "4+",
+    "openToWork": true,
+    "bio": "I've spent four and a half years making technology work seamlessly for people—from ERP implementations that taught me how business systems work, to freelance support solving real-world problems, to now supporting global clients at an MNC.\n\nI believe good support isn't just about closing tickets—it's about clear communication and making someone's day easier. When I'm not troubleshooting infrastructure, you'll find me tinkering with hardware or hiking trails.",
+    "aboutNarrative": {
+      "intro": "My journey in tech started with curiosity and evolved into a passion for solving problems that matter.",
+      "journey": [
+        {
+          "phase": "The Foundation",
+          "description": "As an ERP Support Intern, I learned how enterprise systems power entire organizations. This taught me to see beyond individual tickets to understand business impact."
+        },
+        {
+          "phase": "The Independence",
+          "description": "Going freelance was a leap of faith. Supporting multiple clients across industries sharpened my ability to adapt quickly, communicate clearly, and deliver reliable solutions under pressure."
+        },
+        {
+          "phase": "The Scale",
+          "description": "Now at an MNC, I apply everything I've learned to support global clients. The stakes are higher, the systems more complex, but the core mission remains: make technology invisible so people can focus on what matters."
+        }
+      ],
+      "values": "I bring a unique blend of hands-on technical skills, business awareness from ERP systems, and the client-first mindset developed through freelancing. I don't just fix problems—I prevent them, document solutions, and empower users."
+    }
+  },
+  "experience": [
+    {
+      "id": "exp-3",
+      "company": "Global MNC",
+      "role": "Technical Support Associate L1",
+      "period": "2023 - Present",
+      "current": true,
+      "type": "Full-time",
+      "icon": "🏢",
+      "achievements": [
+        "Managed high-priority technical support for global clients across multiple time zones",
+        "Resolved complex infrastructure issues with 95%+ satisfaction rating",
+        "Implemented improved ticket triage workflows, reducing response time by 30%",
+        "Collaborated with cross-functional teams to deliver enterprise-level solutions",
+        "Maintained detailed documentation for common issues and resolution procedures"
+      ],
+      "skills": ["ServiceNow", "Azure", "Active Directory", "ITIL"]
+    },
+    {
+      "id": "exp-2",
+      "company": "Freelance",
+      "role": "IT Support Consultant",
+      "period": "2021 - 2023",
+      "current": false,
+      "type": "Freelance",
+      "icon": "💼",
+      "achievements": [
+        "Provided technical support to multiple business clients across various industries",
+        "Resolved hardware and software issues with 95% client satisfaction rate",
+        "Configured and maintained network infrastructure for small businesses",
+        "Delivered training sessions on IT best practices and system usage",
+        "Built strong client relationships through clear communication and reliable service"
+      ],
+      "skills": ["Networking", "Windows Server", "Hardware", "Client Training"]
+    },
+    {
+      "id": "exp-1",
+      "company": "Manufacturing Organization",
+      "role": "ERP Support Intern",
+      "period": "2020 - 2021",
+      "current": false,
+      "type": "Internship",
+      "icon": "🎓",
+      "achievements": [
+        "Assisted in ERP system maintenance and end-user support",
+        "Documented technical procedures and workflow improvements",
+        "Collaborated with senior engineers on system optimization projects",
+        "Gained foundational knowledge in enterprise business systems",
+        "Supported data migration and system integration initiatives"
+      ],
+      "skills": ["ERP Systems", "Documentation", "Data Migration", "SQL"]
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "Network Infrastructure Overhaul",
+      "description": "Complete redesign and implementation of network infrastructure for a small business, improving reliability by 99.5% uptime.",
+      "category": "Infrastructure",
+      "highlights": ["Network Design", "Security Implementation", "Documentation"],
+      "impact": "99.5% uptime achieved",
+      "icon": "🌐"
+    },
+    {
+      "id": "proj-2",
+      "title": "Ticketing System Optimization",
+      "description": "Streamlined ticket triage and escalation workflows, resulting in 30% faster response times and improved client satisfaction.",
+      "category": "Process Improvement",
+      "highlights": ["Workflow Design", "SLA Management", "Reporting"],
+      "impact": "30% faster response",
+      "icon": "📊"
+    },
+    {
+      "id": "proj-3",
+      "title": "IT Training Program",
+      "description": "Developed and delivered comprehensive training materials for end-users, reducing recurring support tickets by 40%.",
+      "category": "Training",
+      "highlights": ["Content Creation", "User Training", "Knowledge Base"],
+      "impact": "40% fewer tickets",
+      "icon": "📚"
+    },
+    {
+      "id": "proj-4",
+      "title": "Remote Support Infrastructure",
+      "description": "Implemented secure remote support solutions for distributed teams, enabling seamless troubleshooting across locations.",
+      "category": "Tools",
+      "highlights": ["Remote Access", "Security", "Monitoring"],
+      "impact": "24/7 support coverage",
+      "icon": "🔧"
+    }
+  ],
+  "skills": {
+    "technical": [
+      "Windows/Linux Administration",
+      "Network Management",
+      "ServiceNow & Zendesk",
+      "Active Directory",
+      "Remote Support Tools",
+      "Hardware Troubleshooting",
+      "AWS & Azure Basics",
+      "Bash & PowerShell"
+    ],
+    "soft": [
+      "Problem Solving",
+      "Technical Communication",
+      "Customer Service",
+      "Documentation",
+      "Time Management",
+      "Team Collaboration",
+      "Incident Management"
+    ]
+  },
+  "education": [
+    {
+      "degree": "Bachelor of Technology",
+      "institution": "Engineering College",
+      "year": "2020",
+      "field": "Information Technology"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "ITIL Foundation",
+      "icon": "📋"
+    },
+    {
+      "name": "CompTIA A+",
+      "icon": "🖥️"
+    },
+    {
+      "name": "Azure Fundamentals",
+      "icon": "☁️"
+    }
+  ],
+  "social": {
+    "github": "https://github.com/svaishal",
+    "linkedin": "https://www.linkedin.com/in/freelancer-vaishal/"
+  },
+  "tools": [
+    {
+      "name": "LogMeIn",
+      "category": "Remote Support & Access",
+      "description": "Used for secure remote troubleshooting and user support.",
+      "icon": "logmein"
+    },
+    {
+      "name": "AnyDesk",
+      "category": "Remote Support & Access",
+      "description": "Fast remote desktop access for cross-platform support.",
+      "icon": "anydesk"
+    },
+    {
+      "name": "Citrix Workspace",
+      "category": "Remote Support & Access",
+      "description": "Enterprise virtual desktop and app delivery platform.",
+      "icon": "citrix"
+    },
+    {
+      "name": "Uptime Kuma",
+      "category": "Monitoring & Infra",
+      "description": "Self-hosted uptime monitoring for service health visibility.",
+      "icon": "uptime-kuma"
+    },
+    {
+      "name": "Docker",
+      "category": "Monitoring & Infra",
+      "description": "Container platform for consistent deployment environments.",
+      "icon": "docker"
+    },
+    {
+      "name": "Proxmox",
+      "category": "Monitoring & Infra",
+      "description": "Open-source virtualization platform for server management.",
+      "icon": "proxmox"
+    },
+    {
+      "name": "VirtualBox",
+      "category": "Monitoring & Infra",
+      "description": "Desktop virtualization for testing and development.",
+      "icon": "virtualbox"
+    },
+    {
+      "name": "Hyper-V",
+      "category": "Monitoring & Infra",
+      "description": "Microsoft hypervisor for Windows-based virtualization.",
+      "icon": "microsoft"
+    },
+    {
+      "name": "Okta",
+      "category": "Identity & Access",
+      "description": "Enterprise identity management and SSO provider.",
+      "icon": "okta"
+    },
+    {
+      "name": "Active Directory",
+      "category": "Identity & Access",
+      "description": "Windows identity services for user and resource management.",
+      "icon": "windows"
+    },
+    {
+      "name": "Specops",
+      "category": "Identity & Access",
+      "description": "Password management and security policy enforcement.",
+      "icon": "specops"
+    },
+    {
+      "name": "Active Roles Console",
+      "category": "Identity & Access",
+      "description": "Delegated administration for Active Directory.",
+      "icon": "quest"
+    },
+    {
+      "name": "Tailscale",
+      "category": "Networking & VPN",
+      "description": "Zero-config mesh VPN for secure network access.",
+      "icon": "tailscale"
+    },
+    {
+      "name": "OpenVPN",
+      "category": "Networking & VPN",
+      "description": "Open-source VPN for secure remote connectivity.",
+      "icon": "openvpn"
+    },
+    {
+      "name": "GlobalProtect",
+      "category": "Networking & VPN",
+      "description": "Palo Alto VPN client for enterprise network access.",
+      "icon": "paloalto"
+    },
+    {
+      "name": "Sophos Firewall",
+      "category": "Networking & VPN",
+      "description": "Network security and firewall configuration basics.",
+      "icon": "sophos"
+    },
+    {
+      "name": "GitHub",
+      "category": "Cloud, Dev & Ops",
+      "description": "Version control and collaborative development workflows.",
+      "icon": "github"
+    },
+    {
+      "name": "VS Code",
+      "category": "Cloud, Dev & Ops",
+      "description": "Primary code editor for scripting and automation.",
+      "icon": "vscode"
+    },
+    {
+      "name": "Cloudflare",
+      "category": "Cloud, Dev & Ops",
+      "description": "DNS management and web performance optimization.",
+      "icon": "cloudflare"
+    },
+    {
+      "name": "Brevo",
+      "category": "Cloud, Dev & Ops",
+      "description": "SMTP relay for transactional email delivery.",
+      "icon": "brevo"
+    },
+    {
+      "name": "ServiceNow",
+      "category": "ITSM & Asset Management",
+      "description": "Enterprise ITSM platform for incident management.",
+      "icon": "servicenow"
+    },
+    {
+      "name": "Zendesk",
+      "category": "ITSM & Asset Management",
+      "description": "Customer support and ticketing platform.",
+      "icon": "zendesk"
+    },
+    {
+      "name": "Snipe-IT",
+      "category": "ITSM & Asset Management",
+      "description": "Open-source IT asset management system.",
+      "icon": "snipe-it"
+    },
+    {
+      "name": "Google Workspace",
+      "category": "Workplace & Collaboration",
+      "description": "Cloud productivity suite administration.",
+      "icon": "google"
+    },
+    {
+      "name": "Microsoft 365",
+      "category": "Workplace & Collaboration",
+      "description": "Enterprise productivity and collaboration platform.",
+      "icon": "microsoft-365"
+    },
+    {
+      "name": "Slack",
+      "category": "Workplace & Collaboration",
+      "description": "Team communication and workflow integration.",
+      "icon": "slack"
+    },
+    {
+      "name": "HIS ERP",
+      "category": "ERP & Enterprise Systems",
+      "description": "Healthcare information system support and maintenance.",
+      "icon": "erp"
+    },
+    {
+      "name": "Effitrac ERP",
+      "category": "ERP & Enterprise Systems",
+      "description": "Multi-module ERP for accounting, payroll, and production.",
+      "icon": "erp"
+    },
+    {
+      "name": "Windows",
+      "category": "Operating Systems",
+      "description": "Desktop OS administration and troubleshooting.",
+      "icon": "windows"
+    },
+    {
+      "name": "Windows Server",
+      "category": "Operating Systems",
+      "description": "Server OS management and Active Directory services.",
+      "icon": "windows-server"
+    },
+    {
+      "name": "Linux",
+      "category": "Operating Systems",
+      "description": "Basic command-line administration and scripting.",
+      "icon": "linux"
+    }
+  ],
+  "learning": [
+    {
+      "name": "Prompt Engineering",
+      "description": "Crafting effective prompts for AI-assisted workflows.",
+      "status": "in-progress"
+    },
+    {
+      "name": "Linux Administration",
+      "description": "Deepening server management and scripting skills.",
+      "status": "in-progress"
+    },
+    {
+      "name": "DevOps",
+      "description": "CI/CD pipelines and infrastructure automation.",
+      "status": "in-progress"
+    },
+    {
+      "name": "Vibecoding",
+      "description": "AI-augmented development methodologies.",
+      "status": "in-progress"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+---
+interface Props {
+  name: string;
+  description: string;
+  icon?: string;
+}
+
+const { name, description, icon = 'default' } = Astro.props;
+
+// Icon URL mapping - using selfh.st/icons or fallback to text
+const iconMap: Record<string, string> = {
+  'logmein': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/logmein.svg',
+  'anydesk': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/anydesk.svg',
+  'citrix': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/citrix.svg',
+  'uptime-kuma': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/uptime-kuma.svg',
+  'docker': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/docker.svg',
+  'proxmox': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/proxmox.svg',
+  'virtualbox': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/virtualbox.svg',
+  'microsoft': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/microsoft.svg',
+  'okta': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/okta.svg',
+  'windows': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/windows.svg',
+  'specops': '',
+  'quest': '',
+  'tailscale': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/tailscale.svg',
+  'openvpn': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/openvpn.svg',
+  'paloalto': '',
+  'sophos': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/sophos.svg',
+  'github': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/github.svg',
+  'vscode': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/vscode.svg',
+  'cloudflare': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/cloudflare.svg',
+  'brevo': '',
+  'servicenow': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/servicenow.svg',
+  'zendesk': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/zendesk.svg',
+  'snipe-it': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/snipe-it.svg',
+  'google': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/google.svg',
+  'microsoft-365': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/microsoft-365.svg',
+  'slack': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/slack.svg',
+  'erp': '',
+  'windows-server': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/windows.svg',
+  'linux': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/linux.svg',
+};
+
+const iconUrl = iconMap[icon] || '';
+const hasIcon = iconUrl !== '';
+---
+
+<div 
+  class="tool-card group relative"
+  tabindex="0"
+  role="button"
+  aria-describedby={`tooltip-${name.replace(/\s+/g, '-').toLowerCase()}`}
+>
+  <div class="flex items-center gap-3">
+    {hasIcon ? (
+      <div class="tool-icon">
+        <img 
+          src={iconUrl} 
+          alt="" 
+          aria-hidden="true"
+          class="w-5 h-5 opacity-70 group-hover:opacity-100 group-focus:opacity-100 transition-opacity"
+          loading="lazy"
+        />
+      </div>
+    ) : (
+      <div class="tool-icon-text">
+        <span class="text-xs font-medium text-neutral-400 group-hover:text-neutral-50 group-focus:text-neutral-50 transition-colors">
+          {name.substring(0, 2).toUpperCase()}
+        </span>
+      </div>
+    )}
+    <span class="text-sm text-neutral-300 group-hover:text-neutral-50 group-focus:text-neutral-50 transition-colors truncate">
+      {name}
+    </span>
+  </div>
+  
+  <!-- Tooltip -->
+  <div 
+    id={`tooltip-${name.replace(/\s+/g, '-').toLowerCase()}`}
+    role="tooltip"
+    class="tool-tooltip"
+  >
+    <span class="font-medium text-neutral-50">{name}</span>
+    <span class="text-neutral-400">{description}</span>
+  </div>
+</div>
+
+<style>
+  .tool-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    cursor: default;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .tool-card:hover,
+  .tool-card:focus {
+    border-color: var(--color-accent);
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tool-card:hover,
+    .tool-card:focus {
+      transform: translateY(-2px);
+    }
+  }
+
+  .tool-icon,
+  .tool-icon-text {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .tool-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    min-width: 200px;
+    max-width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 50;
+    pointer-events: none;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .tool-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1a1a1a;
+  }
+
+  .tool-card:hover .tool-tooltip,
+  .tool-card:focus .tool-tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Mobile: show tooltip on tap/touch */
+  @media (hover: none) and (pointer: coarse) {
+    .tool-card:focus .tool-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+</style>

@@ -1,0 +1,206 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getPortfolioData } from '../lib/data';
+
+// Fetch portfolio data (Supabase or fallback to local JSON)
+const data = await getPortfolioData();
+---
+
+<Layout
+  title="Portfolio"
+  description="Featured projects and case studies showcasing IT solutions and technical expertise"
+>
+  <!-- Hero Section -->
+  <section class="pt-32 pb-16 px-6 relative overflow-hidden">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto text-center">
+      <div class="opacity-0 animate-fade-in-up">
+        <p class="section-title">My Work</p>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          Portfolio
+        </h1>
+        <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+          A collection of projects and initiatives that showcase my problem-solving approach and technical capabilities.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Bento Grid -->
+  <section class="py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {data.projects.map((project: any, index: number) => (
+          <div 
+            class={`glass-card p-6 md:p-8 group hover:border-indigo-500/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden ${index === 0 ? 'lg:col-span-2' : ''}`}
+            data-animate
+          >
+            <!-- Background Glow on Hover -->
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            
+            <!-- Icon -->
+            <div class="relative z-10">
+              <div class="flex items-start justify-between mb-6">
+                <span class="text-5xl">{project.icon}</span>
+                <span class="badge">{project.category}</span>
+              </div>
+              
+              <!-- Title & Description -->
+              <h3 class="text-xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
+                {project.title}
+              </h3>
+              <p class="text-slate-400 leading-relaxed mb-6 text-sm">
+                {project.description}
+              </p>
+              
+              <!-- Highlights -->
+              <div class="flex flex-wrap gap-2 mb-6">
+                {project.highlights.map((highlight: string) => (
+                  <span class="px-3 py-1 text-xs bg-white/5 border border-white/10 text-slate-400 rounded-full">
+                    {highlight}
+                  </span>
+                ))}
+              </div>
+              
+              <!-- Impact -->
+              <div class="flex items-center gap-2 pt-4 border-t border-white/5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                <span class="text-emerald-400 font-semibold text-sm">{project.impact}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Approach Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Methodology</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">My Approach</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6" data-animate>
+        <div class="glass-card p-6 text-center hover:border-indigo-500/30 transition-all duration-300 group">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Analyze</h3>
+          <p class="text-slate-400 text-sm">Deep dive into the problem to understand root causes and context.</p>
+        </div>
+
+        <div class="glass-card p-6 text-center hover:border-purple-500/30 transition-all duration-300 group">
+          <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Solve</h3>
+          <p class="text-slate-400 text-sm">Design and implement effective solutions with clear documentation.</p>
+        </div>
+
+        <div class="glass-card p-6 text-center hover:border-emerald-500/30 transition-all duration-300 group">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Iterate</h3>
+          <p class="text-slate-400 text-sm">Continuously improve based on feedback and outcomes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Metrics -->
+  <section class="py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="glass-card p-8 md:p-12 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" data-animate>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <p class="text-4xl md:text-5xl font-bold gradient-text-accent mb-2">99.5%</p>
+            <p class="text-slate-400">Uptime Achieved</p>
+          </div>
+          <div>
+            <p class="text-4xl md:text-5xl font-bold gradient-text-accent mb-2">30%</p>
+            <p class="text-slate-400">Faster Response</p>
+          </div>
+          <div>
+            <p class="text-4xl md:text-5xl font-bold gradient-text-accent mb-2">40%</p>
+            <p class="text-slate-400">Fewer Tickets</p>
+          </div>
+          <div>
+            <p class="text-4xl md:text-5xl font-bold gradient-text-accent mb-2">95%+</p>
+            <p class="text-slate-400">Satisfaction</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools & Technologies -->
+  <section class="py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Tech Stack</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Tools I Work With</h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" data-animate>
+        {[
+          { name: 'ServiceNow', icon: '📋' },
+          { name: 'Azure', icon: '☁️' },
+          { name: 'AWS', icon: '🌐' },
+          { name: 'Active Directory', icon: '🔐' },
+          { name: 'PowerShell', icon: '⚡' },
+          { name: 'Linux', icon: '🐧' },
+          { name: 'Windows Server', icon: '🪟' },
+          { name: 'Networking', icon: '🔌' },
+          { name: 'Zendesk', icon: '🎫' },
+          { name: 'Git', icon: '📂' },
+          { name: 'MS 365', icon: '📊' },
+          { name: 'VMware', icon: '💻' },
+        ].map((tool) => (
+          <div class="glass-card p-4 text-center hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 group">
+            <span class="text-2xl mb-2 block">{tool.icon}</span>
+            <p class="text-slate-300 text-xs font-medium group-hover:text-white transition-colors">{tool.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center" data-animate>
+      <div class="glass-card p-12 bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Have a Project in Mind?</h2>
+        <p class="text-slate-400 mb-8 max-w-lg mx-auto">
+          I'm always interested in hearing about new challenges and opportunities to make technology work better for people.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/contact" class="btn-primary">
+            <span>Let's Talk</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </a>
+          <a href="/experience" class="btn-secondary">
+            <span>View Experience</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

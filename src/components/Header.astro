@@ -1,0 +1,129 @@
+---
+import data from '../data/data.json';
+
+const navItems = [
+  { name: 'Home', path: '/' },
+  { name: 'About', path: '/about' },
+  { name: 'Experience', path: '/experience' },
+  { name: 'Portfolio', path: '/portfolio' },
+  { name: 'Contact', path: '/contact' }
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="header">
+  <div class="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5"></div>
+  
+  <nav class="relative container mx-auto px-6 py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo/Name -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+          {data.personal.name.charAt(0)}
+        </div>
+        <span class="font-semibold text-white hidden sm:block">{data.personal.name}</span>
+      </a>
+      
+      <!-- Desktop Navigation -->
+      <ul class="hidden md:flex items-center gap-1">
+        {navItems.map(item => (
+          <li>
+            <a
+              href={item.path}
+              class={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                currentPath === item.path 
+                  ? 'text-white bg-white/10' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {item.name}
+              {currentPath === item.path && (
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-500"></span>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <!-- CTA Button -->
+      <a 
+        href="/contact" 
+        class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/20"
+      >
+        <span>Let's Talk</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </a>
+
+      <!-- Mobile Menu Button -->
+      <button 
+        class="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+        id="mobile-menu-btn"
+        aria-label="Toggle menu"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden hidden mt-4 pb-4 border-t border-white/5 pt-4" id="mobile-menu">
+      <ul class="flex flex-col gap-2">
+        {navItems.map(item => (
+          <li>
+            <a
+              href={item.path}
+              class={`block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                currentPath === item.path 
+                  ? 'text-white bg-white/10' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {item.name}
+            </a>
+          </li>
+        ))}
+        <li class="mt-2">
+          <a 
+            href="/contact" 
+            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg"
+          >
+            <span>Let's Talk</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Header background on scroll
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      header?.classList.add('scrolled');
+    } else {
+      header?.classList.remove('scrolled');
+    }
+  });
+</script>
+
+<style>
+  #header.scrolled {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+</style>

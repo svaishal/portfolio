@@ -1,0 +1,280 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getPortfolioData, getInitials } from '../lib/data';
+import ToolCard from '../components/ToolCard.astro';
+import LearningCard from '../components/LearningCard.astro';
+
+// Fetch portfolio data (Supabase or fallback to local JSON)
+const data = await getPortfolioData();
+const profile = data.profile!;
+---
+
+<Layout
+  title="About"
+  description="Learn about my journey from ERP systems to enterprise IT support"
+>
+  <!-- Hero Section -->
+  <section class="pt-32 pb-16 px-6 relative overflow-hidden">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto">
+      <div class="text-center mb-12 opacity-0 animate-fade-in-up">
+        <p class="section-title">About Me</p>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          My Story
+        </h1>
+        <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+          {profile.about_intro}
+        </p>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="glass-card p-8 flex flex-col md:flex-row items-center gap-8 opacity-0 animate-fade-in-up delay-200">
+        <!-- Avatar -->
+        <div class="shrink-0">
+          <div class="w-40 h-40 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-2xl shadow-indigo-500/20">
+            <div class="w-full h-full rounded-2xl bg-[#12121a] flex items-center justify-center overflow-hidden">
+              {profile.profile_photo_url ? (
+                <img src={profile.profile_photo_url} alt={profile.name} class="w-full h-full object-cover" />
+              ) : (
+                <span class="text-5xl font-bold gradient-text-accent">{getInitials(profile.name)}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="flex-1 text-center md:text-left">
+          <h2 class="text-2xl font-bold text-white mb-2">{profile.name}</h2>
+          <p class="text-indigo-400 font-medium mb-4">{profile.role}</p>
+          <p class="text-slate-400 leading-relaxed">{profile.bio.split('\n\n')[0]}</p>
+          
+          <div class="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
+            <div class="flex items-center gap-2 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="text-sm">{profile.location}</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span class="text-sm">{profile.years_experience}+ Years</span>
+            </div>
+            {profile.open_to_work && (
+              <span class="badge-success">Open to Work</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Journey Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Career Journey</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">The Path I've Walked</h2>
+      </div>
+
+      <div class="space-y-8">
+        {data.journeyPhases.map((phase, index: number) => (
+          <div class="glass-card p-8 relative group hover:border-indigo-500/30 transition-all duration-300" data-animate>
+            <!-- Phase number -->
+            <div class="absolute -left-3 top-8 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+              {index + 1}
+            </div>
+            
+            <div class="ml-4">
+              <h3 class="text-xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
+                {phase.phase}
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                {phase.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Values -->
+      <div class="glass-card p-8 mt-12 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" data-animate>
+        <h3 class="text-xl font-bold text-white mb-4">What I Bring</h3>
+        <p class="text-slate-300 leading-relaxed">
+          {profile.about_values}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="py-20 px-6 relative">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Capabilities</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Skills & Expertise</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Technical Skills -->
+        <div class="glass-card p-8" data-animate>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white">Technical Skills</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {data.technicalSkills.map((skill) => (
+              <span class="px-3 py-2 text-sm bg-white/5 border border-white/10 text-slate-300 rounded-lg hover:border-indigo-500/50 hover:text-white transition-all cursor-default">
+                {skill.name}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <!-- Soft Skills -->
+        <div class="glass-card p-8" data-animate>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white">Professional Skills</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {data.softSkills.map((skill) => (
+              <span class="px-3 py-2 text-sm bg-white/5 border border-white/10 text-slate-300 rounded-lg hover:border-purple-500/50 hover:text-white transition-all cursor-default">
+                {skill.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools & Applications Section -->
+  <section class="py-20 px-6 relative">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Tech Stack</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Tools & Applications</h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3" data-animate>
+        {data.tools.map((tool) => (
+          <ToolCard 
+            name={tool.name} 
+            description={tool.description}
+            icon={tool.icon}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Currently Learning Section -->
+  <section class="py-16 px-6 relative">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-10" data-animate>
+        <p class="section-title">Growth</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">Currently Learning</h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" data-animate>
+        {data.learning.map((item) => (
+          <LearningCard 
+            name={item.name} 
+            description={item.description}
+            status={item.status}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Education & Certifications -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Credentials</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Education & Certifications</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Education -->
+        <div class="glass-card p-8" data-animate>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white">Education</h3>
+          </div>
+          {data.education.map((edu) => (
+            <div class="mb-4 last:mb-0">
+              <h4 class="text-lg font-semibold text-white">{edu.degree}</h4>
+              <p class="text-indigo-400">{edu.institution}</p>
+              <p class="text-sm text-slate-500">{edu.field} • {edu.year}</p>
+            </div>
+          ))}
+        </div>
+
+        <!-- Certifications -->
+        <div class="glass-card p-8" data-animate>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white">Certifications</h3>
+          </div>
+          <div class="space-y-3">
+            {data.certifications.map((cert) => (
+              <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                <span class="text-2xl">{cert.icon}</span>
+                <span class="text-slate-300">{cert.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center" data-animate>
+      <div class="glass-card p-12 bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Want to Learn More?</h2>
+        <p class="text-slate-400 mb-8">Check out my experience timeline or get in touch directly.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/experience" class="btn-primary">
+            <span>View Experience</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+          <a href="/contact" class="btn-secondary">
+            <span>Contact Me</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

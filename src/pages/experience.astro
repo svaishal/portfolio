@@ -1,0 +1,192 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getPortfolioData } from '../lib/data';
+
+// Fetch portfolio data (Supabase or fallback to local JSON)
+const data = await getPortfolioData();
+const profile = data.profile!;
+---
+
+<Layout
+  title="Experience"
+  description="Professional experience in IT support, from ERP systems to enterprise helpdesk"
+>
+  <!-- Hero Section -->
+  <section class="pt-32 pb-16 px-6 relative overflow-hidden">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto text-center">
+      <div class="opacity-0 animate-fade-in-up">
+        <p class="section-title">Professional Journey</p>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          Experience
+        </h1>
+        <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+          {profile.years_experience}+ years of making technology work seamlessly for people across different industries and scales.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <!-- Timeline -->
+      <div class="relative">
+        <!-- Timeline Line -->
+        <div class="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500 opacity-30"></div>
+
+        <!-- Timeline Items -->
+        <div class="space-y-12">
+          {data.experiences.map((exp, index: number) => (
+            <div class={`relative flex items-start gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`} data-animate>
+              <!-- Timeline Node -->
+              <div class="absolute left-8 md:left-1/2 -translate-x-1/2 z-10">
+                <div class={`w-4 h-4 rounded-full ${exp.is_current ? 'bg-emerald-500 shadow-lg shadow-emerald-500/50' : 'bg-indigo-500'} ring-4 ring-[#0a0a0f]`}>
+                  {exp.is_current && (
+                    <span class="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-50"></span>
+                  )}
+                </div>
+              </div>
+
+              <!-- Content Card -->
+              <div class={`w-full md:w-[calc(50%-2rem)] ${index % 2 === 0 ? 'md:pr-8 ml-16 md:ml-0' : 'md:pl-8 ml-16 md:ml-0'}`}>
+                <div class="glass-card p-6 md:p-8 hover:border-indigo-500/30 transition-all duration-300 group">
+                  <!-- Header -->
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                      <span class="text-4xl">{exp.icon}</span>
+                      <div>
+                        {exp.is_current && (
+                          <span class="badge-success text-xs mb-2 inline-block">Current Role</span>
+                        )}
+                        <h3 class="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+                          {exp.role}
+                        </h3>
+                        <p class="text-indigo-400 font-medium">{exp.company}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Period & Type -->
+                  <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <div class="flex items-center gap-2 text-slate-400 text-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>{exp.period}</span>
+                    </div>
+                    <span class="badge">{exp.type}</span>
+                  </div>
+
+                  <!-- Achievements -->
+                  <div class="space-y-3 mb-6">
+                    {exp.achievements.map((achievement: string) => (
+                      <div class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-slate-300 text-sm leading-relaxed">{achievement}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <!-- Skills Tags -->
+                  <div class="flex flex-wrap gap-2">
+                    {exp.skills.map((skill: string) => (
+                      <span class="px-3 py-1 text-xs bg-white/5 border border-white/10 text-slate-400 rounded-full">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Overview -->
+  <section class="py-20 px-6 relative">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Toolkit</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Technologies & Tools</h2>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-animate>
+        {data.technicalSkills.map((skill, index: number) => (
+          <div class="glass-card p-4 text-center hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 group">
+            <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors">{skill.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12" data-animate>
+        <p class="section-title">Credentials</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Certifications</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" data-animate>
+        {data.certifications.map((cert) => (
+          <div class="glass-card p-6 text-center hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 group">
+            <span class="text-4xl mb-4 block">{cert.icon}</span>
+            <h3 class="text-white font-medium group-hover:text-indigo-400 transition-colors">{cert.name}</h3>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto" data-animate>
+      <div class="glass-card p-8 md:p-12 relative overflow-hidden">
+        <!-- Background Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 pointer-events-none"></div>
+        
+        <div class="relative z-10 text-center">
+          {profile.open_to_work && (
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span class="text-emerald-400 text-sm font-medium">Open to Opportunities</span>
+            </div>
+          )}
+
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Looking for My Next Chapter</h2>
+          <p class="text-slate-400 mb-8 max-w-lg mx-auto">
+            I'm interested in roles where I can leverage my experience in technical support, infrastructure management, and customer service to make a meaningful impact.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/contact" class="btn-primary">
+              <span>Get in Touch</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </a>
+            <a href="/portfolio" class="btn-secondary">
+              <span>View Projects</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

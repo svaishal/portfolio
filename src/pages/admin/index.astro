@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { AdminLogin } from '../../components/admin/AdminLogin';
+---
+
+<AdminLayout title="Admin Login">
+  <AdminLogin client:only="react" />
+</AdminLayout>

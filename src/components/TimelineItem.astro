@@ -1,0 +1,33 @@
+---
+interface Props {
+  company: string;
+  role: string;
+  period: string;
+  type: string;
+  current: boolean;
+  index: number;
+}
+
+const { company, role, period, type, current, index } = Astro.props;
+---
+
+<div class="relative pl-8 pb-12 last:pb-0">
+  <!-- Timeline line -->
+  <div class="absolute left-0 top-2 bottom-0 w-[2px] bg-gradient-to-b from-accent/40 via-secondary/30 to-transparent"></div>
+
+  <!-- Timeline dot -->
+  <div class={`absolute left-0 top-2 w-2 h-2 -translate-x-1/2 rounded-full ${
+    current ? 'bg-accent animate-pulse' : 'bg-neutral-300'
+  }`}></div>
+
+  <div class="space-y-2">
+    <span class="text-xs text-neutral-500 font-mono">{period}</span>
+    <div>
+      <h3 class="text-xl font-semibold text-neutral-900">{role}</h3>
+      <p class="text-accent font-medium">{company}</p>
+      <span class="inline-block mt-1 px-2 py-0.5 text-xs bg-neutral-100 text-neutral-600 rounded border border-neutral-200">
+        {type}
+      </span>
+    </div>
+  </div>
+</div>
