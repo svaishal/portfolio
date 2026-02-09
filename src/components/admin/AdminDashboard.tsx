@@ -103,7 +103,16 @@ export function AdminDashboard() {
           window.location.href = '/admin';
           return;
         }
-        const { user: serverUser, userId } = await response.json();
+        const { user: serverUser, userId, accessToken, refreshToken } = await response.json();
+        
+        // Sync session to client-side Supabase for RLS
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+        }
+        
         setUser(serverUser);
         await loadAllData(userId);
       } catch (err) {
@@ -473,7 +482,7 @@ export function AdminDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
       </div>
     );
   }
@@ -504,7 +513,7 @@ export function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <a href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white font-bold">
                 V
               </div>
               <span className="font-semibold text-white">Admin Dashboard</span>
@@ -535,7 +544,7 @@ export function AdminDashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
                     activeTab === tab.id
-                      ? 'bg-indigo-500/20 text-white border border-indigo-500/30'
+                      ? 'bg-accent/20 text-white border border-accent/30'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -565,7 +574,7 @@ export function AdminDashboard() {
                 <div className="glass-card p-6 space-y-6">
                   {/* Photo Upload */}
                   <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                    <div className="w-24 h-24 rounded-2xl bg-accent flex items-center justify-center overflow-hidden">
                       {profile.profile_photo_url ? (
                         <img src={profile.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
@@ -590,7 +599,7 @@ export function AdminDashboard() {
                         type="text"
                         value={profile.name}
                         onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white"
                       />
                     </div>
                     <div>
@@ -599,7 +608,7 @@ export function AdminDashboard() {
                         type="text"
                         value={profile.role}
                         onChange={(e) => setProfile({ ...profile, role: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white"
                       />
                     </div>
                   </div>
@@ -610,7 +619,7 @@ export function AdminDashboard() {
                       type="text"
                       value={profile.tagline}
                       onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white"
                     />
                   </div>
 
@@ -620,7 +629,7 @@ export function AdminDashboard() {
                       type="text"
                       value={profile.subtitle}
                       onChange={(e) => setProfile({ ...profile, subtitle: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white"
                       placeholder="e.g., ERP Intern → Freelance IT → MNC Professional"
                     />
                   </div>
@@ -632,7 +641,7 @@ export function AdminDashboard() {
                         type="text"
                         value={profile.location}
                         onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white"
                       />
                     </div>
                     <div>
@@ -641,7 +650,7 @@ export function AdminDashboard() {
                         type="text"
                         value={profile.years_experience}
                         onChange={(e) => setProfile({ ...profile, years_experience: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white"
                       />
                     </div>
                   </div>
@@ -652,7 +661,7 @@ export function AdminDashboard() {
                       value={profile.bio}
                       onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                       rows={4}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white resize-none"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white resize-none"
                     />
                   </div>
 
@@ -662,7 +671,7 @@ export function AdminDashboard() {
                       value={profile.about_intro}
                       onChange={(e) => setProfile({ ...profile, about_intro: e.target.value })}
                       rows={2}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white resize-none"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white resize-none"
                     />
                   </div>
 
@@ -672,7 +681,7 @@ export function AdminDashboard() {
                       value={profile.about_values}
                       onChange={(e) => setProfile({ ...profile, about_values: e.target.value })}
                       rows={3}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 text-white resize-none"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent text-white resize-none"
                     />
                   </div>
 
@@ -681,7 +690,7 @@ export function AdminDashboard() {
                       type="checkbox"
                       checked={profile.open_to_work}
                       onChange={(e) => setProfile({ ...profile, open_to_work: e.target.checked })}
-                      className="w-5 h-5 rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-500"
+                      className="w-5 h-5 rounded border-white/20 bg-white/5 text-accent focus:ring-accent"
                     />
                     <span className="text-slate-300">Open to Work</span>
                   </label>
@@ -709,7 +718,7 @@ export function AdminDashboard() {
                         <button
                           onClick={() => saveExperience(exp, index)}
                           disabled={saving}
-                          className="px-3 py-1 text-sm bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30"
+                          className="px-3 py-1 text-sm bg-accent/20 text-accent rounded-lg hover:bg-accent/30"
                         >
                           Save
                         </button>
@@ -733,7 +742,7 @@ export function AdminDashboard() {
                             updated[index].company = e.target.value;
                             setExperiences(updated);
                           }}
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                         />
                       </div>
                       <div>
@@ -746,7 +755,7 @@ export function AdminDashboard() {
                             updated[index].role = e.target.value;
                             setExperiences(updated);
                           }}
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                         />
                       </div>
                     </div>
@@ -763,7 +772,7 @@ export function AdminDashboard() {
                             setExperiences(updated);
                           }}
                           placeholder="2023 - Present"
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                         />
                       </div>
                       <div>
@@ -775,7 +784,7 @@ export function AdminDashboard() {
                             updated[index].type = e.target.value;
                             setExperiences(updated);
                           }}
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                         >
                           <option value="Full-time">Full-time</option>
                           <option value="Freelance">Freelance</option>
@@ -794,7 +803,7 @@ export function AdminDashboard() {
                             setExperiences(updated);
                           }}
                           placeholder="💼"
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                         />
                       </div>
                     </div>
@@ -811,7 +820,7 @@ export function AdminDashboard() {
                           setExperiences(updated);
                         }}
                         rows={4}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white resize-none"
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white resize-none"
                       />
                     </div>
 
@@ -828,7 +837,7 @@ export function AdminDashboard() {
                           setExperiences(updated);
                         }}
                         placeholder="React, Node.js, AWS"
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                       />
                     </div>
 
@@ -842,7 +851,7 @@ export function AdminDashboard() {
                             updated[index].is_current = e.target.checked;
                             setExperiences(updated);
                           }}
-                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-500"
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
                         />
                         <span className="text-slate-300 text-sm">Current Role</span>
                       </label>
@@ -855,7 +864,7 @@ export function AdminDashboard() {
                             updated[index].visible = e.target.checked;
                             setExperiences(updated);
                           }}
-                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-500"
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
                         />
                         <span className="text-slate-300 text-sm">Visible</span>
                       </label>
@@ -883,7 +892,7 @@ export function AdminDashboard() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveCertification(cert, index)}
-                            className="p-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg"
+                            className="p-1.5 bg-accent/20 text-accent rounded-lg"
                           >
                             💾
                           </button>
@@ -939,7 +948,7 @@ export function AdminDashboard() {
                             updated[index].visible = e.target.checked;
                             setCertifications(updated);
                           }}
-                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-500"
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
                         />
                         <span className="text-slate-400 text-sm">Visible</span>
                       </label>
@@ -961,7 +970,7 @@ export function AdminDashboard() {
                       <h3 className="text-lg font-semibold text-white">Technical Skills</h3>
                       <button
                         onClick={() => addSkill('technical')}
-                        className="text-sm text-indigo-400 hover:text-indigo-300"
+                        className="text-sm text-accent hover:text-accent/80"
                       >
                         + Add
                       </button>
@@ -984,7 +993,7 @@ export function AdminDashboard() {
                             />
                             <button
                               onClick={() => saveSkill(skill, globalIndex)}
-                              className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg"
+                              className="p-2 bg-accent/20 text-accent rounded-lg"
                             >
                               💾
                             </button>
@@ -1006,7 +1015,7 @@ export function AdminDashboard() {
                       <h3 className="text-lg font-semibold text-white">Soft Skills</h3>
                       <button
                         onClick={() => addSkill('soft')}
-                        className="text-sm text-indigo-400 hover:text-indigo-300"
+                        className="text-sm text-accent hover:text-accent/80"
                       >
                         + Add
                       </button>
@@ -1029,7 +1038,7 @@ export function AdminDashboard() {
                             />
                             <button
                               onClick={() => saveSkill(skill, globalIndex)}
-                              className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg"
+                              className="p-2 bg-accent/20 text-accent rounded-lg"
                             >
                               💾
                             </button>
@@ -1068,7 +1077,7 @@ export function AdminDashboard() {
                         <button
                           onClick={() => saveProject(proj, index)}
                           disabled={saving}
-                          className="px-3 py-1 text-sm bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30"
+                          className="px-3 py-1 text-sm bg-accent/20 text-accent rounded-lg hover:bg-accent/30"
                         >
                           Save
                         </button>
@@ -1092,7 +1101,7 @@ export function AdminDashboard() {
                             updated[index].title = e.target.value;
                             setProjects(updated);
                           }}
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                         />
                       </div>
                       <div className="flex gap-4">
@@ -1106,7 +1115,7 @@ export function AdminDashboard() {
                               updated[index].category = e.target.value;
                               setProjects(updated);
                             }}
-                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                           />
                         </div>
                         <div className="w-24">
@@ -1119,7 +1128,7 @@ export function AdminDashboard() {
                               updated[index].icon = e.target.value;
                               setProjects(updated);
                             }}
-                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white text-center"
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white text-center"
                           />
                         </div>
                       </div>
@@ -1135,7 +1144,7 @@ export function AdminDashboard() {
                           setProjects(updated);
                         }}
                         rows={2}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white resize-none"
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white resize-none"
                       />
                     </div>
 
@@ -1150,7 +1159,7 @@ export function AdminDashboard() {
                           setProjects(updated);
                         }}
                         placeholder="e.g., 30% faster response times"
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                       />
                     </div>
 
@@ -1166,7 +1175,7 @@ export function AdminDashboard() {
                           updated[index].highlights = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
                           setProjects(updated);
                         }}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
                       />
                     </div>
 
@@ -1179,7 +1188,7 @@ export function AdminDashboard() {
                           updated[index].visible = e.target.checked;
                           setProjects(updated);
                         }}
-                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-500"
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
                       />
                       <span className="text-slate-300 text-sm">Visible</span>
                     </label>

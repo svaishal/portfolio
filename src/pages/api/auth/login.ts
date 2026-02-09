@@ -37,7 +37,7 @@ function resetRateLimit(ip: string) {
 // Verify Cloudflare Turnstile
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const secretKey = import.meta.env.TURNSTILE_SECRET_KEY;
-  
+
   if (!secretKey) {
     // Skip verification if not configured (development)
     return true;
@@ -63,29 +63,29 @@ async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                     request.headers.get('cf-connecting-ip') || 
-                     'unknown';
-    
+    const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('cf-connecting-ip') ||
+      'unknown';
+
     // Check rate limit
     const rateLimitResult = checkRateLimit(clientIP);
     if (!rateLimitResult.allowed) {
-      const retryAfter = rateLimitResult.blockedUntil 
-        ? Math.ceil((rateLimitResult.blockedUntil - Date.now()) / 1000) 
+      const retryAfter = rateLimitResult.blockedUntil
+        ? Math.ceil((rateLimitResult.blockedUntil - Date.now()) / 1000)
         : 900;
-      
+
       return new Response(
         JSON.stringify({ error: 'Too many login attempts. Please try again later.' }),
-        { 
-          status: 429, 
-          headers: { 
+        {
+          status: 429,
+          headers: {
             'Content-Type': 'application/json',
             'Retry-After': retryAfter.toString(),
-          } 
+          }
         }
       );
     }
-    
+
     const body = await request.json();
     const { email, password, turnstileToken } = body;
 
@@ -123,7 +123,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    const supabase = createSupabaseServerClient(cookies);
+    const supabase = createSupabaseServerClient({ request, cookies });
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -142,7 +142,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     resetRateLimit(clientIP);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         redirectTo: '/admin/dashboard'
       }),

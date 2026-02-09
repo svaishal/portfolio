@@ -17,8 +17,8 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
   <section class="pt-32 pb-16 px-6 relative overflow-hidden">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-slate-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-slate-600/5 rounded-full blur-3xl"></div>
     </div>
 
     <div class="relative z-10 max-w-4xl mx-auto text-center">
@@ -161,8 +161,8 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
             <div class="space-y-6">
               <!-- Location -->
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -175,8 +175,8 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
 
               <!-- Response Time -->
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -210,7 +210,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                 href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-indigo-500/50 hover:bg-white/10 transition-all group"
+                class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-accent/50 hover:bg-white/10 transition-all group"
               >
                 <div class="w-10 h-10 rounded-lg bg-[#0077b5]/20 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#0077b5]" fill="currentColor" viewBox="0 0 24 24">
@@ -218,10 +218,10 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-white font-medium group-hover:text-indigo-400 transition-colors">LinkedIn</p>
+                  <p class="text-white font-medium group-hover:text-accent transition-colors">LinkedIn</p>
                   <p class="text-slate-500 text-sm">Connect professionally</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </a>
@@ -230,7 +230,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                 href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-indigo-500/50 hover:bg-white/10 transition-all group"
+                class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-accent/50 hover:bg-white/10 transition-all group"
               >
                 <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -238,10 +238,10 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-white font-medium group-hover:text-indigo-400 transition-colors">GitHub</p>
+                  <p class="text-white font-medium group-hover:text-accent transition-colors">GitHub</p>
                   <p class="text-slate-500 text-sm">Check out my code</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </a>
@@ -279,17 +279,17 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
       </div>
 
       <div class="space-y-4" data-animate>
-        <div class="glass-card p-6 hover:border-indigo-500/30 transition-all">
+        <div class="glass-card p-6 hover:border-accent/30 transition-all">
           <h3 class="text-lg font-semibold text-white mb-2">What type of roles are you looking for?</h3>
           <p class="text-slate-400">I'm interested in Technical Support, IT Infrastructure, or Help Desk roles where I can leverage my experience in enterprise support and customer service.</p>
         </div>
 
-        <div class="glass-card p-6 hover:border-indigo-500/30 transition-all">
+        <div class="glass-card p-6 hover:border-accent/30 transition-all">
           <h3 class="text-lg font-semibold text-white mb-2">Are you open to remote work?</h3>
           <p class="text-slate-400">Yes, I'm comfortable with remote, hybrid, or on-site arrangements. My experience includes supporting remote teams and working across different time zones.</p>
         </div>
 
-        <div class="glass-card p-6 hover:border-indigo-500/30 transition-all">
+        <div class="glass-card p-6 hover:border-accent/30 transition-all">
           <h3 class="text-lg font-semibold text-white mb-2">What's your notice period?</h3>
           <p class="text-slate-400">Please reach out to discuss availability and timeline. I'm flexible and can work with reasonable notice periods.</p>
         </div>

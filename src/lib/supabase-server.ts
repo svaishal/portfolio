@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 import type { Database } from './database.types';
 
-export function createSupabaseServerClient(cookies: AstroCookies) {
+export function createSupabaseServerClient(context: { request: Request; cookies: AstroCookies }) {
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
@@ -10,29 +10,23 @@ export function createSupabaseServerClient(cookies: AstroCookies) {
     throw new Error('Supabase environment variables not configured');
   }
 
+  // Capture values upfront to avoid closure issues with async operations
+  const cookieHeader = context.request?.headers?.get('Cookie') || '';
+  const parsedCookies = cookieHeader
+    ? cookieHeader.split(';').map((cookie) => {
+        const [name, ...value] = cookie.trim().split('=');
+        return { name, value: value.join('=') };
+      })
+    : [];
+
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        const result: { name: string; value: string }[] = [];
-        for (const [name, cookie] of Object.entries(cookies)) {
-          if (typeof cookie === 'object' && cookie && 'value' in cookie) {
-            result.push({ name, value: String(cookie.value) });
-          }
-        }
-        // Try to get cookies from the cookie header using the get method
-        const allCookies = cookies.get('sb-access-token');
-        if (allCookies?.value) {
-          result.push({ name: 'sb-access-token', value: allCookies.value });
-        }
-        const refreshToken = cookies.get('sb-refresh-token');
-        if (refreshToken?.value) {
-          result.push({ name: 'sb-refresh-token', value: refreshToken.value });
-        }
-        return result;
+        return parsedCookies;
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          cookies.set(name, value, {
+          context.cookies.set(name, value, {
             path: '/',
             httpOnly: true,
             secure: import.meta.env.PROD,
@@ -45,9 +39,9 @@ export function createSupabaseServerClient(cookies: AstroCookies) {
     },
     auth: {
       flowType: 'pkce',
-      autoRefreshToken: true,
+      autoRefreshToken: false,
       detectSessionInUrl: false,
-      persistSession: true,
+      persistSession: false,
     },
   });
 }
@@ -56,9 +50,9 @@ export function createSupabaseServerClient(cookies: AstroCookies) {
 export const SESSION_TIMEOUT = 30 * 60;
 
 // Verify session is valid and not expired
-export async function verifySession(cookies: AstroCookies) {
+export async function verifySession(context: { request: Request; cookies: AstroCookies }) {
   try {
-    const supabase = createSupabaseServerClient(cookies);
+    const supabase = createSupabaseServerClient(context);
     const { data: { session }, error } = await supabase.auth.getSession();
 
     if (error || !session) {

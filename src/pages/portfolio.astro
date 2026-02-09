@@ -14,8 +14,8 @@ const data = await getPortfolioData();
   <section class="pt-32 pb-16 px-6 relative overflow-hidden">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute top-0 right-1/4 w-96 h-96 bg-slate-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-1/4 w-80 h-80 bg-slate-600/5 rounded-full blur-3xl"></div>
     </div>
 
     <div class="relative z-10 max-w-4xl mx-auto text-center">
@@ -37,11 +37,11 @@ const data = await getPortfolioData();
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data.projects.map((project: any, index: number) => (
           <div 
-            class={`glass-card p-6 md:p-8 group hover:border-indigo-500/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden ${index === 0 ? 'lg:col-span-2' : ''}`}
+            class={`glass-card p-6 md:p-8 group hover:border-accent/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden ${index === 0 ? 'lg:col-span-2' : ''}`}
             data-animate
           >
             <!-- Background Glow on Hover -->
-            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div class="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             
             <!-- Icon -->
             <div class="relative z-10">
@@ -51,7 +51,7 @@ const data = await getPortfolioData();
               </div>
               
               <!-- Title & Description -->
-              <h3 class="text-xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
+              <h3 class="text-xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
                 {project.title}
               </h3>
               <p class="text-slate-400 leading-relaxed mb-6 text-sm">
@@ -90,9 +90,9 @@ const data = await getPortfolioData();
       </div>
 
       <div class="grid md:grid-cols-3 gap-6" data-animate>
-        <div class="glass-card p-6 text-center hover:border-indigo-500/30 transition-all duration-300 group">
-          <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="glass-card p-6 text-center hover:border-accent/30 transition-all duration-300 group">
+          <div class="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -100,9 +100,9 @@ const data = await getPortfolioData();
           <p class="text-slate-400 text-sm">Deep dive into the problem to understand root causes and context.</p>
         </div>
 
-        <div class="glass-card p-6 text-center hover:border-purple-500/30 transition-all duration-300 group">
-          <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="glass-card p-6 text-center hover:border-accent/30 transition-all duration-300 group">
+          <div class="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
@@ -126,7 +126,7 @@ const data = await getPortfolioData();
   <!-- Key Metrics -->
   <section class="py-20 px-6">
     <div class="max-w-6xl mx-auto">
-      <div class="glass-card p-8 md:p-12 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" data-animate>
+      <div class="glass-card p-8 md:p-12 bg-accent/5" data-animate>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
             <p class="text-4xl md:text-5xl font-bold gradient-text-accent mb-2">99.5%</p>
@@ -172,7 +172,7 @@ const data = await getPortfolioData();
           { name: 'MS 365', icon: '📊' },
           { name: 'VMware', icon: '💻' },
         ].map((tool) => (
-          <div class="glass-card p-4 text-center hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 group">
+          <div class="glass-card p-4 text-center hover:border-accent/30 transition-all duration-300 hover:-translate-y-1 group">
             <span class="text-2xl mb-2 block">{tool.icon}</span>
             <p class="text-slate-300 text-xs font-medium group-hover:text-white transition-colors">{tool.name}</p>
           </div>
@@ -184,7 +184,7 @@ const data = await getPortfolioData();
   <!-- CTA Section -->
   <section class="py-20 px-6">
     <div class="max-w-4xl mx-auto text-center" data-animate>
-      <div class="glass-card p-12 bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+      <div class="glass-card p-12 bg-accent/5">
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Have a Project in Mind?</h2>
         <p class="text-slate-400 mb-8 max-w-lg mx-auto">
           I'm always interested in hearing about new challenges and opportunities to make technology work better for people.

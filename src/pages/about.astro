@@ -17,8 +17,8 @@ const profile = data.profile!;
   <section class="pt-32 pb-16 px-6 relative overflow-hidden">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute top-0 right-0 w-96 h-96 bg-slate-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-0 w-80 h-80 bg-slate-600/5 rounded-full blur-3xl"></div>
     </div>
 
     <div class="relative z-10 max-w-4xl mx-auto">
@@ -36,7 +36,7 @@ const profile = data.profile!;
       <div class="glass-card p-8 flex flex-col md:flex-row items-center gap-8 opacity-0 animate-fade-in-up delay-200">
         <!-- Avatar -->
         <div class="shrink-0">
-          <div class="w-40 h-40 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-2xl shadow-indigo-500/20">
+          <div class="w-40 h-40 rounded-2xl bg-accent p-1 shadow-2xl shadow-black/30">
             <div class="w-full h-full rounded-2xl bg-[#12121a] flex items-center justify-center overflow-hidden">
               {profile.profile_photo_url ? (
                 <img src={profile.profile_photo_url} alt={profile.name} class="w-full h-full object-cover" />
@@ -50,7 +50,7 @@ const profile = data.profile!;
         <!-- Info -->
         <div class="flex-1 text-center md:text-left">
           <h2 class="text-2xl font-bold text-white mb-2">{profile.name}</h2>
-          <p class="text-indigo-400 font-medium mb-4">{profile.role}</p>
+          <p class="text-accent font-medium mb-4">{profile.role}</p>
           <p class="text-slate-400 leading-relaxed">{profile.bio.split('\n\n')[0]}</p>
           
           <div class="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
@@ -86,14 +86,14 @@ const profile = data.profile!;
 
       <div class="space-y-8">
         {data.journeyPhases.map((phase, index: number) => (
-          <div class="glass-card p-8 relative group hover:border-indigo-500/30 transition-all duration-300" data-animate>
+          <div class="glass-card p-8 relative group hover:border-accent/30 transition-all duration-300" data-animate>
             <!-- Phase number -->
-            <div class="absolute -left-3 top-8 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+            <div class="absolute -left-3 top-8 w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold shadow-lg">
               {index + 1}
             </div>
             
             <div class="ml-4">
-              <h3 class="text-xl font-bold text-white mb-3 group-hover:text-indigo-400 transition-colors">
+              <h3 class="text-xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
                 {phase.phase}
               </h3>
               <p class="text-slate-400 leading-relaxed">
@@ -105,7 +105,7 @@ const profile = data.profile!;
       </div>
 
       <!-- Values -->
-      <div class="glass-card p-8 mt-12 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" data-animate>
+      <div class="glass-card p-8 mt-12 bg-accent/5" data-animate>
         <h3 class="text-xl font-bold text-white mb-4">What I Bring</h3>
         <p class="text-slate-300 leading-relaxed">
           {profile.about_values}
@@ -126,8 +126,8 @@ const profile = data.profile!;
         <!-- Technical Skills -->
         <div class="glass-card p-8" data-animate>
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
@@ -135,7 +135,7 @@ const profile = data.profile!;
           </div>
           <div class="flex flex-wrap gap-2">
             {data.technicalSkills.map((skill) => (
-              <span class="px-3 py-2 text-sm bg-white/5 border border-white/10 text-slate-300 rounded-lg hover:border-indigo-500/50 hover:text-white transition-all cursor-default">
+              <span class="px-3 py-2 text-sm bg-white/5 border border-white/10 text-slate-300 rounded-lg hover:border-accent/50 hover:text-white transition-all cursor-default">
                 {skill.name}
               </span>
             ))}
@@ -145,8 +145,8 @@ const profile = data.profile!;
         <!-- Soft Skills -->
         <div class="glass-card p-8" data-animate>
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
@@ -154,7 +154,7 @@ const profile = data.profile!;
           </div>
           <div class="flex flex-wrap gap-2">
             {data.softSkills.map((skill) => (
-              <span class="px-3 py-2 text-sm bg-white/5 border border-white/10 text-slate-300 rounded-lg hover:border-purple-500/50 hover:text-white transition-all cursor-default">
+              <span class="px-3 py-2 text-sm bg-white/5 border border-white/10 text-slate-300 rounded-lg hover:border-accent/50 hover:text-white transition-all cursor-default">
                 {skill.name}
               </span>
             ))}
@@ -228,7 +228,7 @@ const profile = data.profile!;
           {data.education.map((edu) => (
             <div class="mb-4 last:mb-0">
               <h4 class="text-lg font-semibold text-white">{edu.degree}</h4>
-              <p class="text-indigo-400">{edu.institution}</p>
+              <p class="text-accent">{edu.institution}</p>
               <p class="text-sm text-slate-500">{edu.field} • {edu.year}</p>
             </div>
           ))}
@@ -260,7 +260,7 @@ const profile = data.profile!;
   <!-- CTA -->
   <section class="py-20 px-6">
     <div class="max-w-4xl mx-auto text-center" data-animate>
-      <div class="glass-card p-12 bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+      <div class="glass-card p-12 bg-accent/5">
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Want to Learn More?</h2>
         <p class="text-slate-400 mb-8">Check out my experience timeline or get in touch directly.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">

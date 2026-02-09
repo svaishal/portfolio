@@ -1,10 +1,10 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServerClient } from '../../../lib/supabase-server';
 
-export const POST: APIRoute = async ({ cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   try {
-    const supabase = createSupabaseServerClient(cookies);
-    
+    const supabase = createSupabaseServerClient({ request, cookies });
+
     // Sign out from Supabase
     await supabase.auth.signOut();
 
@@ -40,9 +40,9 @@ export const POST: APIRoute = async ({ cookies, redirect }) => {
 };
 
 // Also support GET for direct navigation
-export const GET: APIRoute = async ({ cookies, redirect }) => {
+export const GET: APIRoute = async ({ request, cookies, redirect }) => {
   try {
-    const supabase = createSupabaseServerClient(cookies);
+    const supabase = createSupabaseServerClient({ request, cookies });
     await supabase.auth.signOut();
 
     // Clear cookies

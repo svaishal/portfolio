@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServerClient } from '../../../lib/supabase-server';
 
-export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+export const GET: APIRoute = async ({ request, url, cookies, redirect }) => {
   const code = url.searchParams.get('code');
   const next = url.searchParams.get('next') || '/admin/dashboard';
 
@@ -10,8 +10,8 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   }
 
   try {
-    const supabase = createSupabaseServerClient(cookies);
-    
+    const supabase = createSupabaseServerClient({ request, cookies });
+
     // Exchange the code for a session
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -22,8 +22,8 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 
     // Validate the redirect URL to prevent open redirect
     const allowedPaths = ['/admin', '/admin/dashboard'];
-    const redirectPath = next.startsWith('/') && allowedPaths.some(p => next.startsWith(p)) 
-      ? next 
+    const redirectPath = next.startsWith('/') && allowedPaths.some(p => next.startsWith(p))
+      ? next
       : '/admin/dashboard';
 
     return redirect(redirectPath, 302);

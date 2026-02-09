@@ -21,6 +21,7 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
@@ -29,6 +30,7 @@
     color: var(--color-text-primary);
     min-height: 100vh;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
   }
 
   /* Subtle background - no gradients */
@@ -186,7 +188,7 @@
 
   .btn-secondary:hover {
     border-color: var(--color-accent);
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(0, 112, 255, 0.1);
   }
 
   /* Section styles */

@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       );
     }
 
-    const supabase = createSupabaseServerClient(cookies);
+    const supabase = createSupabaseServerClient({ request, cookies });
 
     // Get the base URL from the request
     const origin = url.origin;
