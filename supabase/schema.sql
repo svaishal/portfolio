@@ -188,6 +188,45 @@ CREATE TABLE IF NOT EXISTS learning (
 );
 
 -- =============================================
+-- CONTACT MESSAGES TABLE (Contact form submissions)
+-- =============================================
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  ip_address TEXT,
+  read BOOLEAN DEFAULT false,
+  archived BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for contact messages
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON contact_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_read ON contact_messages(read);
+
+-- RLS for contact_messages - only service role can insert, authenticated users can read
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- Allow service role to insert (used by the API)
+CREATE POLICY "Service role can insert contact messages"
+  ON contact_messages FOR INSERT
+  WITH CHECK (true);
+
+-- Allow authenticated users to read contact messages (for admin dashboard)
+CREATE POLICY "Authenticated users can read contact messages"
+  ON contact_messages FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Allow authenticated users to update (mark as read)
+CREATE POLICY "Authenticated users can update contact messages"
+  ON contact_messages FOR UPDATE
+  TO authenticated
+  USING (true);
+
+-- =============================================
 -- INDEXES FOR PERFORMANCE
 -- =============================================
 CREATE INDEX IF NOT EXISTS idx_experiences_user_id ON experiences(user_id);
@@ -511,6 +550,58 @@ CREATE TRIGGER update_education_updated_at
 CREATE TRIGGER update_social_links_updated_at
   BEFORE UPDATE ON social_links
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================
+-- STORAGE BUCKET POLICIES
+-- =============================================
+-- Note: Run these in Supabase Dashboard > Storage > Policies
+
+-- Create the avatars bucket (if not exists, do this in Dashboard)
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+
+-- Storage Policies SQL (run in SQL Editor):
+
+-- Allow public read access to avatars
+CREATE POLICY "Public can view avatars"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'avatars');
+
+-- Allow authenticated users to upload to their own folder
+CREATE POLICY "Users can upload own avatars"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    bucket_id = 'avatars' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- Allow authenticated users to update their own files
+CREATE POLICY "Users can update own avatars"
+  ON storage.objects FOR UPDATE
+  TO authenticated
+  USING (
+    bucket_id = 'avatars' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- Allow authenticated users to delete their own files
+CREATE POLICY "Users can delete own avatars"
+  ON storage.objects FOR DELETE
+  TO authenticated
+  USING (
+    bucket_id = 'avatars' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- =============================================
+-- COMPLETED SCHEMA SETUP
+-- =============================================
+-- After running this SQL, configure the following in Supabase Dashboard:
+-- 
+-- 1. Storage > Create bucket "avatars" with Public access
+-- 2. Authentication > Enable Email auth
+-- 3. Authentication > URL Configuration > Set Site URL to your domain
+-- 4. Settings > API > Note your anon key and URL
 
 CREATE TRIGGER update_settings_updated_at
   BEFORE UPDATE ON settings

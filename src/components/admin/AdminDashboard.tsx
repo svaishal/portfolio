@@ -93,28 +93,28 @@ export function AdminDashboard() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  // Auth check
+  // Load data on mount (auth is handled by middleware)
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+    const init = async () => {
+      try {
+        // Get session from server-side via API
+        const response = await fetch('/api/auth/session', { credentials: 'same-origin' });
+        if (!response.ok) {
+          window.location.href = '/admin';
+          return;
+        }
+        const { user: serverUser, userId } = await response.json();
+        setUser(serverUser);
+        await loadAllData(userId);
+      } catch (err) {
+        console.error('Failed to initialize:', err);
         window.location.href = '/admin';
-        return;
+      } finally {
+        setLoading(false);
       }
-      setUser(session.user);
-      await loadAllData(session.user.id);
-      setLoading(false);
     };
 
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        window.location.href = '/admin';
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    init();
   }, []);
 
   // Show toast
@@ -146,7 +146,11 @@ export function AdminDashboard() {
 
   // Handle logout
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
     window.location.href = '/admin';
   };
 
@@ -170,31 +174,47 @@ export function AdminDashboard() {
     }
   };
 
-  // Handle photo upload
+  // Handle photo upload (via secure server-side endpoint)
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !e.target.files?.[0]) return;
 
     const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}/avatar.${fileExt}`;
+    
+    // Client-side validation (server validates again)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    
+    if (file.size > maxSize) {
+      showToast('error', 'File too large. Maximum size is 5MB');
+      return;
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      showToast('error', 'Invalid file type. Allowed: JPG, PNG, WebP, GIF');
+      return;
+    }
 
     setSaving(true);
 
     try {
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucket', 'avatars');
 
-      if (uploadError) throw uploadError;
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+      });
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const data = await response.json();
 
-      // Update profile
-      setProfile({ ...profile, profile_photo_url: publicUrl });
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      // Update profile with new URL
+      setProfile({ ...profile, profile_photo_url: data.url });
       showToast('success', 'Photo uploaded successfully!');
     } catch (error: any) {
       showToast('error', error.message || 'Failed to upload photo');

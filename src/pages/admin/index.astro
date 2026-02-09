@@ -1,8 +1,17 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { AdminLogin } from '../../components/admin/AdminLogin';
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 ---
 
 <AdminLayout title="Admin Login">
   <AdminLogin client:only="react" />
 </AdminLayout>
+
+{turnstileSiteKey && (
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+)}
+<script define:vars={{ turnstileSiteKey }}>
+  window.TURNSTILE_SITE_KEY = turnstileSiteKey;
+</script>

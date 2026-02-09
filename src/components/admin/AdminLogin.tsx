@@ -1,5 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import React, { useState, useEffect, useRef } from 'react';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: any) => string;
+      getResponse: (widgetId?: string) => string | undefined;
+      reset: (widgetId?: string) => void;
+    };
+  }
+}
 
 export function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -7,19 +16,35 @@ export function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [turnstileWidgetId, setTurnstileWidgetId] = useState<string | null>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
 
+  // Initialize Turnstile widget
   useEffect(() => {
-    // Check if user is already logged in
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        window.location.href = '/admin/dashboard';
-      } else {
-        setIsCheckingAuth(false);
-      }
-    };
-    checkAuth();
+    const siteKey = (window as any).TURNSTILE_SITE_KEY;
+    
+    if (siteKey && turnstileContainerRef.current && window.turnstile) {
+      const widgetId = window.turnstile.render(turnstileContainerRef.current, {
+        sitekey: siteKey,
+        theme: 'dark',
+        callback: () => {}, // Token received
+      });
+      setTurnstileWidgetId(widgetId);
+    }
+  }, []);
+
+  // Check URL for error params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam) {
+      const errorMessages: Record<string, string> = {
+        'no_code': 'Authentication failed. Please try again.',
+        'auth_failed': 'Invalid or expired link. Please request a new one.',
+        'internal': 'An error occurred. Please try again.',
+      };
+      setError(errorMessages[errorParam] || 'Authentication failed');
+    }
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -27,19 +52,29 @@ export function AdminLogin() {
     setLoading(true);
     setError(null);
 
+    // Get Turnstile token if available
+    const turnstileToken = window.turnstile?.getResponse(turnstileWidgetId || undefined);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, turnstileToken }),
+        credentials: 'same-origin',
       });
 
-      if (error) {
-        setError(error.message);
-      } else {
-        window.location.href = '/admin/dashboard';
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed');
+        // Reset Turnstile on error
+        window.turnstile?.reset(turnstileWidgetId || undefined);
+      } else if (data.redirectTo) {
+        window.location.href = data.redirectTo;
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError('Network error. Please try again.');
+      window.turnstile?.reset(turnstileWidgetId || undefined);
     } finally {
       setLoading(false);
     }
@@ -55,32 +90,26 @@ export function AdminLogin() {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin/dashboard`,
-        },
+      const response = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        credentials: 'same-origin',
       });
 
-      if (error) {
-        setError(error.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to send magic link');
       } else {
         setMessage('Check your email for a magic link!');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
@@ -149,6 +178,9 @@ export function AdminLogin() {
                 placeholder="••••••••"
               />
             </div>
+
+            {/* Turnstile Widget */}
+            <div ref={turnstileContainerRef} className="flex justify-center"></div>
 
             {/* Login Button */}
             <button
