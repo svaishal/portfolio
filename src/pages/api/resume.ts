@@ -1,141 +1,62 @@
 import type { APIRoute } from 'astro';
+import { getPortfolioData } from '../../lib/data';
 
-// Create Supabase client manually using env vars
-async function createServerClient(request: Request) {
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+// ✅ FIX: Resume endpoint should NOT require authentication
+// It uses public portfolio data only (fallback or public Supabase queries)
+export const GET: APIRoute = async ({ request }) => {
 
-    if (!supabaseUrl || !supabaseKey) {
-        throw new Error('Missing Supabase environment variables');
+  try {
+    // Use the same public data function that powers the main site
+    const data = await getPortfolioData();
+
+    if (!data.profile) {
+      console.error('[DEBUG] Resume API: No profile data found');
+      return new Response(JSON.stringify({ error: 'Profile not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Import dynamically to avoid issues
-    const { createClient } = await import('@supabase/supabase-js');
-    return createClient(supabaseUrl, supabaseKey, {
-        auth: {
-            persistSession: false,
-        },
+    const profile = data.profile;
+    const experiences = data.experiences || [];
+    const tools = data.tools || [];
+    const certifications = data.certifications || [];
+    const education = data.education || [];
+    const skills = data.technicalSkills || [];
+
+
+    // Generate ATS-safe HTML resume
+    const html = generateATSResumeHTML(profile, experiences, tools, certifications, education, skills);
+
+
+    // Return HTML with proper headers to trigger download
+    // In a production environment, you'd convert this to PDF server-side
+    // For now, we'll return HTML that can be printed as PDF
+    return new Response(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html',
+        'Content-Disposition': `attachment; filename="${profile.name.replace(/\s+/g, '_')}_Resume.html"`,
+      },
     });
-}
-
-export const GET: APIRoute = async ({ request, cookies }) => {
-    // Get access token from cookies  
-    const accessToken = cookies.get('sb-access-token')?.value;
-    const refreshToken = cookies.get('sb-refresh-token')?.value;
-
-    if (!accessToken || !refreshToken) {
-        return new Response(JSON.stringify({ error: 'Unauthorized - Please login' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
-
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Set session from cookies
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
+  } catch (error: any) {
+    console.error('[DEBUG] Resume API: Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to generate resume', details: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
     });
-
-    if (sessionError || !sessionData.session) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
-
-    const session = sessionData.session;
-
-    try {
-        const userId = session.user.id;
-
-        // Fetch all necessary data from Supabase
-        const [profileRes, experiencesRes, toolsRes, certificationsRes, educationRes, skillsRes] =
-            await Promise.all([
-                supabase.from('profiles').select('*').eq('user_id', userId).single(),
-                supabase
-                    .from('experiences')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .eq('visible', true)
-                    .order('sort_order'),
-                supabase
-                    .from('tools')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .eq('visible', true)
-                    .order('sort_order'),
-                supabase
-                    .from('certifications')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .eq('visible', true)
-                    .order('sort_order'),
-                supabase
-                    .from('education')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .eq('visible', true)
-                    .order('sort_order'),
-                supabase
-                    .from('skills')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .eq('visible', true)
-                    .eq('category', 'technical')
-                    .order('sort_order'),
-            ]);
-
-        if (profileRes.error || !profileRes.data) {
-            return new Response(JSON.stringify({ error: 'Profile not found' }), {
-                status: 404,
-                headers: { 'Content-Type': 'application/json' },
-            });
-        }
-
-        const profile = profileRes.data;
-        const experiences = experiencesRes.data || [];
-        const tools = toolsRes.data || [];
-        const certifications = certificationsRes.data || [];
-        const education = educationRes.data || [];
-        const skills = skillsRes.data || [];
-
-        // Generate ATS-safe HTML resume
-        const html = generateATSResumeHTML(profile, experiences, tools, certifications, education, skills);
-
-        // Return HTML with proper headers to trigger download
-        // In a production environment, you'd convert this to PDF server-side
-        // For now, we'll return HTML that can be printed as PDF
-        return new Response(html, {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/html',
-                'Content-Disposition': `attachment; filename="${profile.name.replace(/\\s+/g, '_')}_Resume.html"`,
-            },
-        });
-    } catch (error: any) {
-        console.error('Resume generation error:', error);
-        return new Response(JSON.stringify({ error: 'Failed to generate resume' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
+  }
 };
 
 function generateATSResumeHTML(
-    profile: any,
-    experiences: any[],
-    tools: any[],
-    certifications: any[],
-    education: any[],
-    skills: any[]
+  profile: any,
+  experiences: any[],
+  tools: any[],
+  certifications: any[],
+  education: any[],
+  skills: any[]
 ): string {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -244,11 +165,11 @@ function generateATSResumeHTML(
   
   <!-- Experience -->
   ${experiences.length > 0
-            ? `<div class="section">
+      ? `<div class="section">
     <h2>Professional Experience</h2>
     ${experiences
-                .map(
-                    (exp) => `
+        .map(
+          (exp) => `
     <div style="margin-bottom: 10pt;">
       <div class="job-header">
         <div>
@@ -261,61 +182,61 @@ function generateATSResumeHTML(
       </ul>
       ${exp.skills && exp.skills.length > 0 ? `<p><strong>Technologies:</strong> ${exp.skills.join(', ')}</p>` : ''}
     </div>`
-                )
-                .join('')}
+        )
+        .join('')}
   </div>`
-            : ''
-        }
+      : ''
+    }
   
   <!-- Technical Skills -->
   ${skills.length > 0
-            ? `<div class="section">
+      ? `<div class="section">
     <h2>Technical Skills</h2>
     <div class="skills-list">
       <p>${skills.map((s) => s.name).join(', ')}</p>
     </div>
   </div>`
-            : ''
-        }
+      : ''
+    }
   
   <!-- Tools & Technologies -->
   ${tools.length > 0
-            ? `<div class="section">
+      ? `<div class="section">
     <h2>Tools & Technologies</h2>
     <div class="skills-list">
       <p>${tools.map((t) => t.name).join(', ')}</p>
     </div>
   </div>`
-            : ''
-        }
+      : ''
+    }
   
   <!-- Education -->
   ${education.length > 0
-            ? `<div class="section">
+      ? `<div class="section">
     <h2>Education</h2>
     ${education
-                .map(
-                    (edu) => `
+        .map(
+          (edu) => `
     <div style="margin-bottom: 6pt;">
       <h3>${edu.degree}</h3>
       <p>${edu.institution}${edu.field ? ` - ${edu.field}` : ''}${edu.year ? ` (${edu.year})` : ''}</p>
     </div>`
-                )
-                .join('')}
+        )
+        .join('')}
   </div>`
-            : ''
-        }
+      : ''
+    }
   
   <!-- Certifications -->
   ${certifications.length > 0
-            ? `<div class="section">
+      ? `<div class="section">
     <h2>Certifications</h2>
     <ul>
       ${certifications.map((cert) => `<li>${cert.name}${cert.issuer ? ` - ${cert.issuer}` : ''}</li>`).join('')}
     </ul>
   </div>`
-            : ''
-        }
+      : ''
+    }
   
   <script>
     // Auto-open print dialog for easy PDF saving

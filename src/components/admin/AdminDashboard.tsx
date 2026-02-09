@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
+// ✅ CRITICAL: Move env access to module scope (outside component render)
+const DEV_ADMIN_BYPASS = import.meta.env.PUBLIC_DEV_ADMIN_BYPASS === "true";
+
 // Types
 interface Profile {
   id?: string;
@@ -104,6 +107,7 @@ export function AdminDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
 
+
   // Load data on mount (auth is handled by middleware)
   useEffect(() => {
     const init = async () => {
@@ -116,19 +120,23 @@ export function AdminDashboard() {
         }
         const { user: serverUser, userId, accessToken, refreshToken } = await response.json();
 
-        // Sync session to client-side Supabase for RLS
-        if (accessToken && refreshToken) {
+        // Sync session to client-side Supabase for RLS (skip in dev bypass mode)
+        if (DEV_ADMIN_BYPASS !== 'true' && accessToken && refreshToken) {
           await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
+        } else {
         }
 
         setUser(serverUser);
         await loadAllData(userId);
       } catch (err) {
-        console.error('Failed to initialize:', err);
-        window.location.href = '/admin';
+        console.error('[DEBUG] Failed to initialize:', err);
+        // Only redirect if NOT in dev bypass mode
+        if (DEV_ADMIN_BYPASS !== 'true') {
+          window.location.href = '/admin';
+        }
       } finally {
         setLoading(false);
       }
@@ -145,6 +153,15 @@ export function AdminDashboard() {
 
   // Load all data
   const loadAllData = async (userId: string) => {
+    // ⚠️ LOCAL DEV MODE - Skip data loading for now
+    // TODO: Dynamic import of data.json doesn't work in client:only React components
+    // For now, just show empty dashboard in dev mode
+    if (DEV_ADMIN_BYPASS === 'true') {
+      setLoading(false);
+      return;
+    }
+
+    // Normal Supabase loading
     try {
       const [profileRes, expRes, certRes, skillRes, projRes, toolsRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('user_id', userId).single(),
