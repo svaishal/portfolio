@@ -110,7 +110,7 @@ export interface PortfolioData {
 // Fallback data transformer
 function getFallbackData(): PortfolioData {
   const data = fallbackData as any;
-  
+
   return {
     profile: {
       id: 'fallback',
@@ -202,6 +202,12 @@ function getFallbackData(): PortfolioData {
 
 // Fetch all portfolio data
 export async function getPortfolioData(): Promise<PortfolioData> {
+  // TEMPORARY: Force fallback data for local development
+  // TODO: Re-enable Supabase once database is populated
+  console.log('Using fallback data from data.json');
+  return getFallbackData();
+
+  /* Original Supabase logic (disabled temporarily)
   if (!isSupabaseConfigured) {
     console.log('Supabase not configured, using fallback data');
     return getFallbackData();
@@ -258,6 +264,7 @@ export async function getPortfolioData(): Promise<PortfolioData> {
     console.error('Error fetching from Supabase:', error);
     return getFallbackData();
   }
+  */
 }
 
 // Get specific social link
