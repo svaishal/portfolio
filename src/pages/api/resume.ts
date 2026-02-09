@@ -1,0 +1,330 @@
+import type { APIRoute } from 'astro';
+
+// Create Supabase client manually using env vars
+async function createServerClient(request: Request) {
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase environment variables');
+    }
+
+    // Import dynamically to avoid issues
+    const { createClient } = await import('@supabase/supabase-js');
+    return createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            persistSession: false,
+        },
+    });
+}
+
+export const GET: APIRoute = async ({ request, cookies }) => {
+    // Get access token from cookies  
+    const accessToken = cookies.get('sb-access-token')?.value;
+    const refreshToken = cookies.get('sb-refresh-token')?.value;
+
+    if (!accessToken || !refreshToken) {
+        return new Response(JSON.stringify({ error: 'Unauthorized - Please login' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Set session from cookies
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+    });
+
+    if (sessionError || !sessionData.session) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    const session = sessionData.session;
+
+    try {
+        const userId = session.user.id;
+
+        // Fetch all necessary data from Supabase
+        const [profileRes, experiencesRes, toolsRes, certificationsRes, educationRes, skillsRes] =
+            await Promise.all([
+                supabase.from('profiles').select('*').eq('user_id', userId).single(),
+                supabase
+                    .from('experiences')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('visible', true)
+                    .order('sort_order'),
+                supabase
+                    .from('tools')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('visible', true)
+                    .order('sort_order'),
+                supabase
+                    .from('certifications')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('visible', true)
+                    .order('sort_order'),
+                supabase
+                    .from('education')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('visible', true)
+                    .order('sort_order'),
+                supabase
+                    .from('skills')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('visible', true)
+                    .eq('category', 'technical')
+                    .order('sort_order'),
+            ]);
+
+        if (profileRes.error || !profileRes.data) {
+            return new Response(JSON.stringify({ error: 'Profile not found' }), {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
+        const profile = profileRes.data;
+        const experiences = experiencesRes.data || [];
+        const tools = toolsRes.data || [];
+        const certifications = certificationsRes.data || [];
+        const education = educationRes.data || [];
+        const skills = skillsRes.data || [];
+
+        // Generate ATS-safe HTML resume
+        const html = generateATSResumeHTML(profile, experiences, tools, certifications, education, skills);
+
+        // Return HTML with proper headers to trigger download
+        // In a production environment, you'd convert this to PDF server-side
+        // For now, we'll return HTML that can be printed as PDF
+        return new Response(html, {
+            status: 200,
+            headers: {
+                'Content-Type': 'text/html',
+                'Content-Disposition': `attachment; filename="${profile.name.replace(/\\s+/g, '_')}_Resume.html"`,
+            },
+        });
+    } catch (error: any) {
+        console.error('Resume generation error:', error);
+        return new Response(JSON.stringify({ error: 'Failed to generate resume' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+};
+
+function generateATSResumeHTML(
+    profile: any,
+    experiences: any[],
+    tools: any[],
+    certifications: any[],
+    education: any[],
+    skills: any[]
+): string {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${profile.name} - Resume</title>
+  <style>
+    /* ATS-Safe Styling: Simple, black & white, no colors */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.4;
+      color: #000;
+      background: #fff;
+      padding: 0.5in;
+      max-width: 8.5in;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 20pt;
+      font-weight: bold;
+      margin-bottom: 4pt;
+      text-transform: uppercase;
+    }
+    
+    h2 {
+      font-size: 13pt;
+      font-weight: bold;
+      margin-top: 12pt;
+      margin-bottom: 6pt;
+      border-bottom: 1px solid #000;
+      padding-bottom: 2pt;
+      text-transform: uppercase;
+    }
+    
+    h3 {
+      font-size: 11pt;
+      font-weight: bold;
+      margin-top: 6pt;
+      margin-bottom: 2pt;
+    }
+    
+    p, li {
+      margin-bottom: 3pt;
+    }
+    
+    ul {
+      margin-left: 20pt;
+      margin-bottom: 6pt;
+    }
+    
+    .contact-info {
+      margin-bottom: 8pt;
+      font-size: 10pt;
+    }
+    
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3pt;
+    }
+    
+    .job-title {
+      font-weight: bold;
+    }
+    
+    .job-period {
+      font-style: italic;
+    }
+    
+    .skills-list {
+      margin-bottom: 6pt;
+    }
+    
+    /* Ensure no page breaks within sections */
+    .section {
+      page-break-inside: avoid;
+    }
+    
+    @media print {
+      body {
+        padding: 0.25in;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <h1>${profile.name}</h1>
+  <div class="contact-info">
+    <p>${profile.role}</p>
+    <p>${profile.location} | ${profile.years_experience} Years Experience</p>
+  </div>
+  
+  <!-- Professional Summary -->
+  <div class="section">
+    <h2>Professional Summary</h2>
+    <p>${profile.tagline}</p>
+  </div>
+  
+  <!-- Experience -->
+  ${experiences.length > 0
+            ? `<div class="section">
+    <h2>Professional Experience</h2>
+    ${experiences
+                .map(
+                    (exp) => `
+    <div style="margin-bottom: 10pt;">
+      <div class="job-header">
+        <div>
+          <span class="job-title">${exp.role}</span> - ${exp.company}
+        </div>
+        <div class="job-period">${exp.period}</div>
+      </div>
+      <ul>
+        ${exp.achievements.map((achievement: string) => `<li>${achievement}</li>`).join('')}
+      </ul>
+      ${exp.skills && exp.skills.length > 0 ? `<p><strong>Technologies:</strong> ${exp.skills.join(', ')}</p>` : ''}
+    </div>`
+                )
+                .join('')}
+  </div>`
+            : ''
+        }
+  
+  <!-- Technical Skills -->
+  ${skills.length > 0
+            ? `<div class="section">
+    <h2>Technical Skills</h2>
+    <div class="skills-list">
+      <p>${skills.map((s) => s.name).join(', ')}</p>
+    </div>
+  </div>`
+            : ''
+        }
+  
+  <!-- Tools & Technologies -->
+  ${tools.length > 0
+            ? `<div class="section">
+    <h2>Tools & Technologies</h2>
+    <div class="skills-list">
+      <p>${tools.map((t) => t.name).join(', ')}</p>
+    </div>
+  </div>`
+            : ''
+        }
+  
+  <!-- Education -->
+  ${education.length > 0
+            ? `<div class="section">
+    <h2>Education</h2>
+    ${education
+                .map(
+                    (edu) => `
+    <div style="margin-bottom: 6pt;">
+      <h3>${edu.degree}</h3>
+      <p>${edu.institution}${edu.field ? ` - ${edu.field}` : ''}${edu.year ? ` (${edu.year})` : ''}</p>
+    </div>`
+                )
+                .join('')}
+  </div>`
+            : ''
+        }
+  
+  <!-- Certifications -->
+  ${certifications.length > 0
+            ? `<div class="section">
+    <h2>Certifications</h2>
+    <ul>
+      ${certifications.map((cert) => `<li>${cert.name}${cert.issuer ? ` - ${cert.issuer}` : ''}</li>`).join('')}
+    </ul>
+  </div>`
+            : ''
+        }
+  
+  <script>
+    // Auto-open print dialog for easy PDF saving
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>`;
+}

@@ -65,7 +65,17 @@ interface Project {
   sort_order: number;
 }
 
-type TabType = 'profile' | 'experience' | 'certifications' | 'skills' | 'projects';
+interface Tool {
+  id?: string;
+  name: string;
+  category: string;
+  description: string;
+  icon: string;
+  visible: boolean;
+  sort_order: number;
+}
+
+type TabType = 'profile' | 'experience' | 'certifications' | 'skills' | 'projects' | 'tools';
 
 export function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -92,6 +102,7 @@ export function AdminDashboard() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
 
   // Load data on mount (auth is handled by middleware)
   useEffect(() => {
@@ -104,7 +115,7 @@ export function AdminDashboard() {
           return;
         }
         const { user: serverUser, userId, accessToken, refreshToken } = await response.json();
-        
+
         // Sync session to client-side Supabase for RLS
         if (accessToken && refreshToken) {
           await supabase.auth.setSession({
@@ -112,7 +123,7 @@ export function AdminDashboard() {
             refresh_token: refreshToken,
           });
         }
-        
+
         setUser(serverUser);
         await loadAllData(userId);
       } catch (err) {
@@ -135,12 +146,13 @@ export function AdminDashboard() {
   // Load all data
   const loadAllData = async (userId: string) => {
     try {
-      const [profileRes, expRes, certRes, skillRes, projRes] = await Promise.all([
+      const [profileRes, expRes, certRes, skillRes, projRes, toolsRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('user_id', userId).single(),
         supabase.from('experiences').select('*').eq('user_id', userId).order('sort_order'),
         supabase.from('certifications').select('*').eq('user_id', userId).order('sort_order'),
         supabase.from('skills').select('*').eq('user_id', userId).order('sort_order'),
         supabase.from('projects').select('*').eq('user_id', userId).order('sort_order'),
+        supabase.from('tools').select('*').eq('user_id', userId).order('sort_order'),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data);
@@ -148,6 +160,7 @@ export function AdminDashboard() {
       if (certRes.data) setCertifications(certRes.data);
       if (skillRes.data) setSkills(skillRes.data);
       if (projRes.data) setProjects(projRes.data);
+      if (toolsRes.data) setTools(toolsRes.data);
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -188,16 +201,16 @@ export function AdminDashboard() {
     if (!user || !e.target.files?.[0]) return;
 
     const file = e.target.files[0];
-    
+
     // Client-side validation (server validates again)
     const maxSize = 5 * 1024 * 1024; // 5MB
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    
+
     if (file.size > maxSize) {
       showToast('error', 'File too large. Maximum size is 5MB');
       return;
     }
-    
+
     if (!allowedTypes.includes(file.type)) {
       showToast('error', 'Invalid file type. Allowed: JPG, PNG, WebP, GIF');
       return;
@@ -278,7 +291,7 @@ export function AdminDashboard() {
   // Delete experience
   const deleteExperience = async (exp: Experience, index: number) => {
     if (!confirm('Are you sure you want to delete this experience?')) return;
-    
+
     setSaving(true);
 
     try {
@@ -336,7 +349,7 @@ export function AdminDashboard() {
   // Delete skill
   const deleteSkill = async (skill: Skill, index: number) => {
     if (!confirm('Delete this skill?')) return;
-    
+
     setSaving(true);
 
     try {
@@ -400,7 +413,7 @@ export function AdminDashboard() {
   // Delete project
   const deleteProject = async (proj: Project, index: number) => {
     if (!confirm('Are you sure you want to delete this project?')) return;
-    
+
     setSaving(true);
 
     try {
@@ -461,7 +474,7 @@ export function AdminDashboard() {
   // Delete certification
   const deleteCertification = async (cert: Certification, index: number) => {
     if (!confirm('Delete this certification?')) return;
-    
+
     setSaving(true);
 
     try {
@@ -479,6 +492,67 @@ export function AdminDashboard() {
     }
   };
 
+  // Add new tool
+  const addTool = () => {
+    setTools([
+      ...tools,
+      {
+        name: '',
+        category: '',
+        description: '',
+        icon: '🔧',
+        visible: true,
+        sort_order: tools.length,
+      },
+    ]);
+  };
+
+  // Save tool
+  const saveTool = async (tool: Tool, index: number) => {
+    if (!user) return;
+    setSaving(true);
+
+    try {
+      const { data, error } = await supabase.from('tools').upsert({
+        ...tool,
+        user_id: user.id,
+      }).select().single();
+
+      if (error) throw error;
+
+      const updated = [...tools];
+      updated[index] = data;
+      setTools(updated);
+      showToast('success', 'Tool saved!');
+    } catch (error: any) {
+      showToast('error', error.message || 'Failed to save tool');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete tool
+  const deleteTool = async (tool: Tool, index: number) => {
+    if (!confirm('Delete this tool?')) return;
+
+    setSaving(true);
+
+    try {
+      if (tool.id) {
+        const { error } = await supabase.from('tools').delete().eq('id', tool.id);
+        if (error) throw error;
+      }
+
+      setTools(tools.filter((_, i) => i !== index));
+      showToast('success', 'Tool deleted!');
+    } catch (error: any) {
+      showToast('error', error.message || 'Failed to delete tool');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -493,17 +567,17 @@ export function AdminDashboard() {
     { id: 'certifications', label: 'Certifications', icon: '📜' },
     { id: 'skills', label: 'Skills', icon: '🛠️' },
     { id: 'projects', label: 'Projects', icon: '📁' },
+    { id: 'tools', label: 'Tools', icon: '🔧' },
   ];
 
   return (
     <div className="min-h-screen">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg ${
-          toast.type === 'success' 
-            ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400' 
-            : 'bg-red-500/20 border border-red-500/30 text-red-400'
-        }`}>
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg ${toast.type === 'success'
+          ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
+          : 'bg-red-500/20 border border-red-500/30 text-red-400'
+          }`}>
           {toast.message}
         </div>
       )}
@@ -542,11 +616,10 @@ export function AdminDashboard() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-accent/20 text-white border border-accent/30'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${activeTab === tab.id
+                    ? 'bg-accent/20 text-white border border-accent/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <span className="text-xl">{tab.icon}</span>
                   <span className="font-medium">{tab.label}</span>
@@ -1194,6 +1267,110 @@ export function AdminDashboard() {
                     </label>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Tools Tab */}
+            {activeTab === 'tools' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Tools & Applications</h2>
+                  <button onClick={addTool} className="btn-primary">
+                    + Add Tool
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  {tools.map((tool, index) => (
+                    <div key={tool.id || index} className="glass-card p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{tool.icon}</span>
+                          <span className="text-white font-medium">{tool.name || 'New Tool'}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveTool(tool, index)}
+                            className="p-1.5 bg-accent/20 text-accent rounded-lg hover:bg-accent/30"
+                          >
+                            💾
+                          </button>
+                          <button
+                            onClick={() => deleteTool(tool, index)}
+                            className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3">
+                        <input
+                          type="text"
+                          value={tool.name}
+                          onChange={(e) => {
+                            const updated = [...tools];
+                            updated[index].name = e.target.value;
+                            setTools(updated);
+                          }}
+                          placeholder="Tool name (e.g., Visual Studio Code)"
+                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent"
+                        />
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={tool.category}
+                            onChange={(e) => {
+                              const updated = [...tools];
+                              updated[index].category = e.target.value;
+                              setTools(updated);
+                            }}
+                            placeholder="Category (e.g., Development)"
+                            className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent"
+                          />
+                          <input
+                            type="text"
+                            value={tool.icon}
+                            onChange={(e) => {
+                              const updated = [...tools];
+                              updated[index].icon = e.target.value;
+                              setTools(updated);
+                            }}
+                            placeholder="Icon (emoji)"
+                            className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm text-center focus:outline-none focus:border-accent"
+                          />
+                        </div>
+
+                        <textarea
+                          value={tool.description}
+                          onChange={(e) => {
+                            const updated = [...tools];
+                            updated[index].description = e.target.value;
+                            setTools(updated);
+                          }}
+                          placeholder="Brief description (1-2 lines for hover tooltip)"
+                          rows={2}
+                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm resize-none focus:outline-none focus:border-accent"
+                        />
+
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={tool.visible}
+                            onChange={(e) => {
+                              const updated = [...tools];
+                              updated[index].visible = e.target.checked;
+                              setTools(updated);
+                            }}
+                            className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
+                          />
+                          <span className="text-slate-400 text-sm">Visible on public site</span>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </main>
