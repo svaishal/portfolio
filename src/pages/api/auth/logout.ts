@@ -20,12 +20,10 @@ export const POST: APIRoute = async ({ cookies, redirect }) => {
     });
 
     // Also clear any Supabase auth cookies that might be set with the project ref
-    const allCookies = cookies.headers.get('cookie') || '';
-    allCookies.split(';').forEach(cookie => {
-      const [name] = cookie.trim().split('=');
-      if (name.startsWith('sb-')) {
-        cookies.delete(name, { path: '/' });
-      }
+    // Note: we cannot easily iterate all cookies in Astro, so we clear known patterns
+    const knownCookiePrefixes = ['sb-access-token', 'sb-refresh-token', 'sb-auth-token'];
+    knownCookiePrefixes.forEach(name => {
+      cookies.delete(name, { path: '/' });
     });
 
     return new Response(

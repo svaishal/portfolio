@@ -13,10 +13,22 @@ export function createSupabaseServerClient(cookies: AstroCookies) {
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        return cookies.headers.get('cookie')?.split('; ').map((cookie) => {
-          const [name, ...value] = cookie.split('=');
-          return { name, value: value.join('=') };
-        }) ?? [];
+        const result: { name: string; value: string }[] = [];
+        for (const [name, cookie] of Object.entries(cookies)) {
+          if (typeof cookie === 'object' && cookie && 'value' in cookie) {
+            result.push({ name, value: String(cookie.value) });
+          }
+        }
+        // Try to get cookies from the cookie header using the get method
+        const allCookies = cookies.get('sb-access-token');
+        if (allCookies?.value) {
+          result.push({ name: 'sb-access-token', value: allCookies.value });
+        }
+        const refreshToken = cookies.get('sb-refresh-token');
+        if (refreshToken?.value) {
+          result.push({ name: 'sb-refresh-token', value: refreshToken.value });
+        }
+        return result;
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
