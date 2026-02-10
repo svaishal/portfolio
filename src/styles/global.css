@@ -2,13 +2,19 @@
 @config "../../tailwind.config.mjs";
 
 :root {
-  /* Landa Design Tokens */
-    --bg-main: #050505;
-    --bg-surface: #121212;
-    --color-primary: #0070FF;
-    --color-text-main: #F5F5F7;
-    --color-text-muted: #A1A1A6;
-    --border-subtle: rgba(255, 255, 255, 0.08);
+  /* Landa Design Tokens (Portfolio 2.0) */
+    --bg-main: #FFFFFF; /* White background as per guide */
+    --bg-surface: #F9FAFB; /* Gray-50 for surfaces */
+    
+    --color-primary: #000000;        /* Black for headings/text */
+    --color-secondary: #6366F1;      /* Indigo accent */
+    --color-accent: #10B981;         /* Green for CTAs/Success */
+    
+    --color-text-main: #111827;      /* Gray-900 */
+    --color-text-muted: #6B7280;     /* Gray-500 */
+    
+    --border-subtle: #E5E7EB;        /* Gray-200 */
+    
     /* Layout */
     --max-width: 1200px;
     --nav-height: 80px;

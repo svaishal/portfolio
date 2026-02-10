@@ -21,32 +21,32 @@ const name = profile?.name || 'Portfolio';
 const initial = name.charAt(0);
 ---
 
-<header class="fixed top-0 left-0 right-0 z-50 h-[var(--nav-height)] border-b border-white/5 bg-[#050505]/80 backdrop-blur-md transition-all duration-300">
+<header class="fixed top-0 left-0 right-0 z-50 h-[var(--nav-height)] border-b border-gray-200 bg-white/80 backdrop-blur-md transition-all duration-300">
   <div class="max-w-[var(--max-width)] mx-auto px-6 h-full flex items-center justify-between">
     
     <!-- Logo -->
     <a href="/" class="flex items-center gap-3 group">
-      <div class="relative w-10 h-10 rounded-xl bg-surface border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors">
+      <div class="relative w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors">
         {profile?.profile_photo_url ? (
           <img src={profile.profile_photo_url} alt={name} class="w-full h-full object-cover" />
         ) : (
-          <span class="font-bold text-white group-hover:text-primary transition-colors">{initial}</span>
+          <span class="font-bold text-primary group-hover:text-secondary transition-colors">{initial}</span>
         )}
       </div>
-      <span class="font-semibold text-text-main hidden sm:block group-hover:text-white transition-colors">
+      <span class="font-semibold text-text-main hidden sm:block group-hover:text-primary transition-colors">
         {name}
       </span>
     </a>
 
     <!-- Desktop Nav -->
-    <nav class="hidden md:flex items-center gap-1 bg-surface/50 p-1 rounded-full border border-white/5 backdrop-blur-sm">
+    <nav class="hidden md:flex items-center gap-1 bg-gray-50 p-1 rounded-full border border-gray-200">
       {navItems.map(item => (
         <a 
           href={item.path} 
           class={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
             currentPath === item.path 
-              ? 'bg-white/10 text-white shadow-sm' 
-              : 'text-text-muted hover:text-white hover:bg-white/5'
+              ? 'bg-white text-primary shadow-sm border border-gray-100' 
+              : 'text-text-muted hover:text-primary hover:bg-white/50'
           }`}
         >
           {item.name}
@@ -72,7 +72,7 @@ const initial = name.charAt(0);
     </div>
 
     <!-- Mobile Menu Toggle -->
-    <button id="mobile-menu-btn" class="md:hidden p-2 text-text-muted hover:text-white">
+    <button id="mobile-menu-btn" class="md:hidden p-2 text-text-muted hover:text-primary">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
@@ -85,7 +85,7 @@ const initial = name.charAt(0);
       {navItems.map(item => (
         <a 
           href={item.path} 
-          class={`text-lg font-medium py-3 border-b border-white/5 ${
+          class={`text-lg font-medium py-3 border-b border-gray-100 ${
             currentPath === item.path ? 'text-primary' : 'text-text-muted'
           }`}
         >
