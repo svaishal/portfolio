@@ -1,9 +1,12 @@
 -- =============================================
 -- SUPABASE DATABASE SCHEMA FOR PORTFOLIO CMS
 -- =============================================
--- Version: 2.0 (Production Ready)
+-- Version: 2.1 (Production Ready - Idempotent)
 -- Last Updated: 2026-02-10
 -- Security Audit: PASSED (95/100)
+--
+-- IDEMPOTENT: This script can be safely re-run multiple times
+-- It will drop and recreate policies/triggers as needed
 --
 -- DEPLOYMENT INSTRUCTIONS:
 -- 1. Run this entire script in Supabase SQL Editor
@@ -247,6 +250,82 @@ ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tools ENABLE ROW LEVEL SECURITY;
 ALTER TABLE learning ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- DROP EXISTING POLICIES (for idempotency)
+-- =============================================
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can delete own profile" ON profiles;
+
+DROP POLICY IF EXISTS "Public can view visible experiences" ON experiences;
+DROP POLICY IF EXISTS "Owner can view all experiences" ON experiences;
+DROP POLICY IF EXISTS "Owner can insert experiences" ON experiences;
+DROP POLICY IF EXISTS "Owner can update experiences" ON experiences;
+DROP POLICY IF EXISTS "Owner can delete experiences" ON experiences;
+
+DROP POLICY IF EXISTS "Public can view visible certifications" ON certifications;
+DROP POLICY IF EXISTS "Owner can view all certifications" ON certifications;
+DROP POLICY IF EXISTS "Owner can insert certifications" ON certifications;
+DROP POLICY IF EXISTS "Owner can update certifications" ON certifications;
+DROP POLICY IF EXISTS "Owner can delete certifications" ON certifications;
+
+DROP POLICY IF EXISTS "Public can view visible skills" ON skills;
+DROP POLICY IF EXISTS "Owner can view all skills" ON skills;
+DROP POLICY IF EXISTS "Owner can insert skills" ON skills;
+DROP POLICY IF EXISTS "Owner can update skills" ON skills;
+DROP POLICY IF EXISTS "Owner can delete skills" ON skills;
+
+DROP POLICY IF EXISTS "Public can view visible projects" ON projects;
+DROP POLICY IF EXISTS "Owner can view all projects" ON projects;
+DROP POLICY IF EXISTS "Owner can insert projects" ON projects;
+DROP POLICY IF EXISTS "Owner can update projects" ON projects;
+DROP POLICY IF EXISTS "Owner can delete projects" ON projects;
+
+DROP POLICY IF EXISTS "Public can view visible journey phases" ON journey_phases;
+DROP POLICY IF EXISTS "Owner can view all journey phases" ON journey_phases;
+DROP POLICY IF EXISTS "Owner can insert journey phases" ON journey_phases;
+DROP POLICY IF EXISTS "Owner can update journey phases" ON journey_phases;
+DROP POLICY IF EXISTS "Owner can delete journey phases" ON journey_phases;
+
+DROP POLICY IF EXISTS "Public can view visible education" ON education;
+DROP POLICY IF EXISTS "Owner can view all education" ON education;
+DROP POLICY IF EXISTS "Owner can insert education" ON education;
+DROP POLICY IF EXISTS "Owner can update education" ON education;
+DROP POLICY IF EXISTS "Owner can delete education" ON education;
+
+DROP POLICY IF EXISTS "Public can view visible social links" ON social_links;
+DROP POLICY IF EXISTS "Owner can view all social links" ON social_links;
+DROP POLICY IF EXISTS "Owner can insert social links" ON social_links;
+DROP POLICY IF EXISTS "Owner can update social links" ON social_links;
+DROP POLICY IF EXISTS "Owner can delete social links" ON social_links;
+
+DROP POLICY IF EXISTS "Owner can view own settings" ON settings;
+DROP POLICY IF EXISTS "Owner can insert settings" ON settings;
+DROP POLICY IF EXISTS "Owner can update settings" ON settings;
+DROP POLICY IF EXISTS "Owner can delete settings" ON settings;
+
+DROP POLICY IF EXISTS "Public can view visible tools" ON tools;
+DROP POLICY IF EXISTS "Owner can view all tools" ON tools;
+DROP POLICY IF EXISTS "Owner can insert tools" ON tools;
+DROP POLICY IF EXISTS "Owner can update tools" ON tools;
+DROP POLICY IF EXISTS "Owner can delete tools" ON tools;
+
+DROP POLICY IF EXISTS "Public can view visible learning" ON learning;
+DROP POLICY IF EXISTS "Owner can view all learning" ON learning;
+DROP POLICY IF EXISTS "Owner can insert learning" ON learning;
+DROP POLICY IF EXISTS "Owner can update learning" ON learning;
+DROP POLICY IF EXISTS "Owner can delete learning" ON learning;
+
+DROP POLICY IF EXISTS "Service role can insert contact messages" ON contact_messages;
+DROP POLICY IF EXISTS "Authenticated users can read contact messages" ON contact_messages;
+DROP POLICY IF EXISTS "Authenticated users can update contact messages" ON contact_messages;
+
+DROP POLICY IF EXISTS "Public can view avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can upload own avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own avatars" ON storage.objects;
 
 -- =============================================
 -- PROFILES POLICIES
@@ -514,8 +593,21 @@ CREATE POLICY "Authenticated users can update contact messages"
   USING (true);
 
 -- =============================================
--- UPDATED_AT TRIGGER FUNCTION
+-- DROP AND RECREATE TRIGGERS (for idempotency)
 -- =============================================
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+DROP TRIGGER IF EXISTS update_experiences_updated_at ON experiences;
+DROP TRIGGER IF EXISTS update_certifications_updated_at ON certifications;
+DROP TRIGGER IF EXISTS update_skills_updated_at ON skills;
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
+DROP TRIGGER IF EXISTS update_journey_phases_updated_at ON journey_phases;
+DROP TRIGGER IF EXISTS update_education_updated_at ON education;
+DROP TRIGGER IF EXISTS update_social_links_updated_at ON social_links;
+DROP TRIGGER IF EXISTS update_settings_updated_at ON settings;
+DROP TRIGGER IF EXISTS update_tools_updated_at ON tools;
+DROP TRIGGER IF EXISTS update_learning_updated_at ON learning;
+
+-- UPDATED_AT TRIGGER FUNCTION
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -653,7 +745,7 @@ CREATE POLICY "Users can delete own avatars"
 --    - Verify unauthenticated users cannot modify data
 --
 -- =============================================
--- SCHEMA VERSION: 2.0 (Production Ready)
+-- SCHEMA VERSION: 2.1 (Production Ready - Idempotent)
 -- SECURITY AUDIT: PASSED (95/100)
 -- LAST UPDATED: 2026-02-10
 -- =============================================
