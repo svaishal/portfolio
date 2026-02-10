@@ -2,10 +2,12 @@
 
 import type { Session, User } from '@supabase/supabase-js';
 
-declare namespace App {
-  interface Locals {
-    session: Session | null;
-    user: User | null;
+declare global {
+  namespace App {
+    interface Locals {
+      session: Session | null;
+      user: User | null;
+    }
   }
 }
 

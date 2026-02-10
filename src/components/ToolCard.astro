@@ -40,131 +40,48 @@ const iconMap: Record<string, string> = {
   'linux': 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/linux.svg',
 };
 
-const iconUrl = iconMap[icon] || '';
+const iconUrl = icon.startsWith('http') ? icon : (iconMap[icon] || '');
 const hasIcon = iconUrl !== '';
 ---
 
 <div 
-  class="tool-card group relative"
+  class="group relative flex items-center gap-3 p-3 bg-surface border border-white/5 rounded-xl hover:border-primary/50 hover:bg-white/5 transition-all cursor-default"
   tabindex="0"
   role="button"
   aria-describedby={`tooltip-${name.replace(/\s+/g, '-').toLowerCase()}`}
 >
-  <div class="flex items-center gap-3">
-    {hasIcon ? (
-      <div class="tool-icon">
-        <img 
-          src={iconUrl} 
-          alt="" 
-          aria-hidden="true"
-          class="w-5 h-5 opacity-70 group-hover:opacity-100 group-focus:opacity-100 transition-opacity"
-          loading="lazy"
-        />
-      </div>
-    ) : (
-      <div class="tool-icon-text">
-        <span class="text-xs font-medium text-neutral-400 group-hover:text-neutral-50 group-focus:text-neutral-50 transition-colors">
-          {name.substring(0, 2).toUpperCase()}
-        </span>
-      </div>
-    )}
-    <span class="text-sm text-neutral-300 group-hover:text-neutral-50 group-focus:text-neutral-50 transition-colors truncate">
-      {name}
-    </span>
-  </div>
+  {hasIcon ? (
+    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+      <img 
+        src={iconUrl} 
+        alt="" 
+        aria-hidden="true"
+        class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity"
+        loading="lazy"
+      />
+    </div>
+  ) : (
+    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+      <span class="text-xs font-bold text-text-muted group-hover:text-white transition-colors">
+        {name.substring(0, 2).toUpperCase()}
+      </span>
+    </div>
+  )}
+  
+  <span class="text-sm font-medium text-text-muted group-hover:text-white transition-colors truncate">
+    {name}
+  </span>
   
   <!-- Tooltip -->
   <div 
     id={`tooltip-${name.replace(/\s+/g, '-').toLowerCase()}`}
     role="tooltip"
-    class="tool-tooltip"
+    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-surface border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 pointer-events-none"
   >
-    <span class="font-medium text-neutral-50">{name}</span>
-    <span class="text-neutral-400">{description}</span>
+    <div class="text-xs font-bold text-white mb-1">{name}</div>
+    <div class="text-xs text-text-muted leading-relaxed">{description}</div>
+    
+    <!-- Arrow -->
+    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-surface"></div>
   </div>
 </div>
-
-<style>
-  .tool-card {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    cursor: default;
-    transition: border-color 0.2s ease, transform 0.2s ease;
-  }
-
-  .tool-card:hover,
-  .tool-card:focus {
-    border-color: var(--color-accent);
-    outline: none;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .tool-card:hover,
-    .tool-card:focus {
-      transform: translateY(-2px);
-    }
-  }
-
-  .tool-icon,
-  .tool-icon-text {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(80, 80, 80, 0.2);
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-
-  .tool-tooltip {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1a1a1a;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    min-width: 200px;
-    max-width: 280px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.15s ease, visibility 0.15s ease;
-    z-index: 50;
-    pointer-events: none;
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 0.8125rem;
-    line-height: 1.4;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-
-  .tool-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #1a1a1a;
-  }
-
-  .tool-card:hover .tool-tooltip,
-  .tool-card:focus .tool-tooltip {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  /* Mobile: show tooltip on tap/touch */
-  @media (hover: none) and (pointer: coarse) {
-    .tool-card:focus .tool-tooltip {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-</style>

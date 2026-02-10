@@ -51,24 +51,6 @@ export const SESSION_TIMEOUT = 30 * 60;
 
 // Verify session is valid and not expired
 export async function verifySession(context: { request: Request; cookies: AstroCookies }) {
-  // ⚠️ LOCAL DEV MODE - Bypass session verification for local testing
-  if (import.meta.env.PUBLIC_DEV_ADMIN_BYPASS === 'true') {
-    console.log('[DEBUG] DEV MODE: Bypassing session verification in middleware');
-    return {
-      valid: true,
-      session: {
-        user: {
-          id: 'dev-user-123',
-          email: 'dev@local.test',
-          role: 'authenticated',
-        },
-        access_token: 'dev-token',
-        refresh_token: 'dev-refresh',
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-      },
-    };
-  }
-
   try {
     const supabase = createSupabaseServerClient(context);
     const { data: { session }, error } = await supabase.auth.getSession();

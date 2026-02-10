@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAutoSaveObject, useAutoSaveList } from '../../hooks/useAutoSave';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
-
-// ✅ CRITICAL: Move env access to module scope (outside component render)
-const DEV_ADMIN_BYPASS = import.meta.env.PUBLIC_DEV_ADMIN_BYPASS === "true";
+import { useAutoLogout } from '../../hooks/useAutoLogout';
+import { migrateData } from '../../utils/migrateData';
+import { apiCall } from '../../utils/api';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { ToastProvider, useToast } from '../../hooks/useToast';
 
 // Types
 interface Profile {
@@ -78,14 +81,41 @@ interface Tool {
   sort_order: number;
 }
 
-type TabType = 'profile' | 'experience' | 'certifications' | 'skills' | 'projects' | 'tools';
+interface Education {
+  id?: string;
+  degree: string;
+  institution: string;
+  field: string;
+  year: string;
+  visible: boolean;
+  sort_order: number;
+}
+
+type TabType = 'profile' | 'experience' | 'education' | 'certifications' | 'skills' | 'projects' | 'tools';
 
 export function AdminDashboard() {
+  return (
+    <ErrorBoundary>
+      <ToastProvider>
+        <AdminDashboardContent />
+      </ToastProvider>
+    </ErrorBoundary>
+  );
+}
+
+function AdminDashboardContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  
+  const { success, error: showError } = useToast();
+
+  // Helper to maintain compatibility
+  const showToast = (type: 'success' | 'error', message: string) => {
+    if (type === 'success') success('Success', message);
+    else showError('Error', message);
+  };
 
   // Data states
   const [profile, setProfile] = useState<Profile>({
@@ -106,6 +136,22 @@ export function AdminDashboard() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
+  const [education, setEducation] = useState<Education[]>([]);
+
+  // Auto-logout: 30 min inactivity, tab close, navigation
+  useAutoLogout({
+    inactivityTimeout: 30 * 60 * 1000, // 30 minutes
+    onLogout: async () => {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+      } catch (err) {
+        console.error('Auto-logout error:', err);
+      }
+      window.location.href = '/admin';
+    },
+    showExitConfirmation: true,
+    logoutOnUnload: true,
+  });
 
 
   // Load data on mount (auth is handled by middleware)
@@ -120,23 +166,20 @@ export function AdminDashboard() {
         }
         const { user: serverUser, userId, accessToken, refreshToken } = await response.json();
 
-        // Sync session to client-side Supabase for RLS (skip in dev bypass mode)
-        if (DEV_ADMIN_BYPASS !== 'true' && accessToken && refreshToken) {
+        // Sync session to client-side Supabase for RLS
+        if (accessToken && refreshToken) {
           await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
-        } else {
         }
 
         setUser(serverUser);
         await loadAllData(userId);
       } catch (err) {
         console.error('[DEBUG] Failed to initialize:', err);
-        // Only redirect if NOT in dev bypass mode
-        if (DEV_ADMIN_BYPASS !== 'true') {
-          window.location.href = '/admin';
-        }
+        // Redirect to login on any auth error
+        window.location.href = '/admin';
       } finally {
         setLoading(false);
       }
@@ -145,41 +188,30 @@ export function AdminDashboard() {
     init();
   }, []);
 
-  // Show toast
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   // Load all data
   const loadAllData = async (userId: string) => {
-    // ⚠️ LOCAL DEV MODE - Skip data loading for now
-    // TODO: Dynamic import of data.json doesn't work in client:only React components
-    // For now, just show empty dashboard in dev mode
-    if (DEV_ADMIN_BYPASS === 'true') {
-      setLoading(false);
-      return;
-    }
-
     // Normal Supabase loading
     try {
-      const [profileRes, expRes, certRes, skillRes, projRes, toolsRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('user_id', userId).single(),
-        supabase.from('experiences').select('*').eq('user_id', userId).order('sort_order'),
-        supabase.from('certifications').select('*').eq('user_id', userId).order('sort_order'),
-        supabase.from('skills').select('*').eq('user_id', userId).order('sort_order'),
-        supabase.from('projects').select('*').eq('user_id', userId).order('sort_order'),
-        supabase.from('tools').select('*').eq('user_id', userId).order('sort_order'),
+      const [profileRes, expRes, certRes, skillRes, projRes, toolsRes, eduRes] = await Promise.all([
+        (supabase.from('profiles_draft' as any) as any).select('*').eq('user_id', userId).single(),
+        (supabase.from('experiences_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
+        (supabase.from('certifications_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
+        (supabase.from('skills_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
+        (supabase.from('projects_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
+        (supabase.from('tools_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
+        (supabase.from('education_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
       ]);
 
-      if (profileRes.data) setProfile(profileRes.data);
-      if (expRes.data) setExperiences(expRes.data);
-      if (certRes.data) setCertifications(certRes.data);
-      if (skillRes.data) setSkills(skillRes.data);
-      if (projRes.data) setProjects(projRes.data);
-      if (toolsRes.data) setTools(toolsRes.data);
+      if (profileRes.data) setProfile(profileRes.data as unknown as Profile);
+      if (expRes.data) setExperiences(expRes.data as unknown as Experience[]);
+      if (certRes.data) setCertifications(certRes.data as unknown as Certification[]);
+      if (skillRes.data) setSkills(skillRes.data as unknown as Skill[]);
+      if (projRes.data) setProjects(projRes.data as unknown as Project[]);
+      if (toolsRes.data) setTools(toolsRes.data as unknown as Tool[]);
+      if (eduRes.data) setEducation(eduRes.data as unknown as Education[]);
     } catch (error) {
       console.error('Error loading data:', error);
+      showToast('error', 'Failed to load data. Please refresh.');
     }
   };
 
@@ -194,24 +226,32 @@ export function AdminDashboard() {
   };
 
   // Save profile
-  const saveProfile = async () => {
+  const saveProfile = useCallback(async (options?: { silent?: boolean }) => {
     if (!user) return;
-    setSaving(true);
+    if (!options?.silent) setSaving(true);
 
     try {
-      const { error } = await supabase.from('profiles').upsert({
-        ...profile,
-        user_id: user.id,
+      const { error } = await apiCall('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'profiles', data: profile }),
       });
 
       if (error) throw error;
-      showToast('success', 'Profile saved successfully!');
+      if (!options?.silent) showToast('success', 'Profile saved successfully!');
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to save profile');
+      if (!options?.silent) showToast('error', error.message || 'Failed to save profile');
+      else console.error('Auto-save profile error:', error);
     } finally {
-      setSaving(false);
+      if (!options?.silent) setSaving(false);
     }
-  };
+  }, [user, profile]); // Dependency on profile ensures new closure
+
+  // Auto-save Profile
+  const { isSaving: isSavingProfile } = useAutoSaveObject(
+    profile, 
+    () => saveProfile({ silent: true }), 
+    1500
+  );
 
   // Handle photo upload (via secure server-side endpoint)
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -271,8 +311,8 @@ export function AdminDashboard() {
         role: '',
         period: '',
         type: 'Full-time',
-        icon: '💼',
-        achievements: [''],
+        icon: 'briefcase',
+        achievements: [],
         skills: [],
         is_current: false,
         sort_order: experiences.length,
@@ -282,28 +322,37 @@ export function AdminDashboard() {
   };
 
   // Save experience
-  const saveExperience = async (exp: Experience, index: number) => {
+  const saveExperience = useCallback(async (exp: Experience, index: number, options?: { silent?: boolean }) => {
     if (!user) return;
-    setSaving(true);
-
+    // Don't set global saving for list items in auto-save mode
+    
     try {
-      const { data, error } = await supabase.from('experiences').upsert({
-        ...exp,
-        user_id: user.id,
-      }).select().single();
+      const { data: savedData, error } = await apiCall<{ data: Experience }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'experiences', data: exp }),
+      });
 
       if (error) throw error;
 
-      const updated = [...experiences];
-      updated[index] = data;
-      setExperiences(updated);
-      showToast('success', 'Experience saved!');
+      // Only update state if it's a new item (to get ID)
+      // For existing items, we keep local state to preserve cursor/focus/edits
+      if (!exp.id && savedData?.data) {
+        setExperiences((prev) => {
+          const updated = [...prev];
+          updated[index] = savedData.data; // Server data has ID
+          return updated;
+        });
+      }
+
+      if (!options?.silent) showToast('success', 'Experience saved!');
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to save experience');
-    } finally {
-      setSaving(false);
+      if (!options?.silent) showToast('error', error.message || 'Failed to save experience');
+      else console.error('Auto-save experience error:', error);
     }
-  };
+  }, [user]); 
+
+  // Auto-save Experiences
+  useAutoSaveList(experiences, (item, index) => saveExperience(item, index, { silent: true }), 1500);
 
   // Delete experience
   const deleteExperience = async (exp: Experience, index: number) => {
@@ -313,7 +362,10 @@ export function AdminDashboard() {
 
     try {
       if (exp.id) {
-        const { error } = await supabase.from('experiences').delete().eq('id', exp.id);
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'experiences', id: exp.id }),
+        });
         if (error) throw error;
       }
 
@@ -343,14 +395,16 @@ export function AdminDashboard() {
   const saveSkill = async (skill: Skill, index: number) => {
     if (!user) return;
     setSaving(true);
-
     try {
-      const { data, error } = await supabase.from('skills').upsert({
-        ...skill,
-        user_id: user.id,
-      }).select().single();
+      const { data: apiData, error } = await apiCall<{ message: string; data: Skill }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'skills', data: skill }),
+      });
 
       if (error) throw error;
+      const data = apiData?.data;
+      
+      if (!data) throw new Error('No data returned from API');
 
       const updated = [...skills];
       updated[index] = data;
@@ -371,7 +425,10 @@ export function AdminDashboard() {
 
     try {
       if (skill.id) {
-        const { error } = await supabase.from('skills').delete().eq('id', skill.id);
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'skills', id: skill.id }),
+        });
         if (error) throw error;
       }
 
@@ -407,14 +464,16 @@ export function AdminDashboard() {
   const saveProject = async (proj: Project, index: number) => {
     if (!user) return;
     setSaving(true);
-
     try {
-      const { data, error } = await supabase.from('projects').upsert({
-        ...proj,
-        user_id: user.id,
-      }).select().single();
+      const { data: apiData, error } = await apiCall<{ message: string; data: Project }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'projects', data: proj }),
+      });
 
       if (error) throw error;
+      const data = apiData?.data;
+      
+      if (!data) throw new Error('No data returned from API');
 
       const updated = [...projects];
       updated[index] = data;
@@ -435,7 +494,10 @@ export function AdminDashboard() {
 
     try {
       if (proj.id) {
-        const { error } = await supabase.from('projects').delete().eq('id', proj.id);
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'projects', id: proj.id }),
+        });
         if (error) throw error;
       }
 
@@ -470,12 +532,15 @@ export function AdminDashboard() {
     setSaving(true);
 
     try {
-      const { data, error } = await supabase.from('certifications').upsert({
-        ...cert,
-        user_id: user.id,
-      }).select().single();
+      const { data: apiData, error } = await apiCall<{ message: string; data: Certification }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'certifications', data: cert }),
+      });
 
       if (error) throw error;
+      const data = apiData?.data;
+      
+      if (!data) throw new Error('No data returned from API');
 
       const updated = [...certifications];
       updated[index] = data;
@@ -496,7 +561,10 @@ export function AdminDashboard() {
 
     try {
       if (cert.id) {
-        const { error } = await supabase.from('certifications').delete().eq('id', cert.id);
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'certifications', id: cert.id }),
+        });
         if (error) throw error;
       }
 
@@ -530,12 +598,15 @@ export function AdminDashboard() {
     setSaving(true);
 
     try {
-      const { data, error } = await supabase.from('tools').upsert({
-        ...tool,
-        user_id: user.id,
-      }).select().single();
+      const { data: apiData, error } = await apiCall<{ message: string; data: Tool }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'tools', data: tool }),
+      });
 
       if (error) throw error;
+      const data = apiData?.data;
+      
+      if (!data) throw new Error('No data returned from API');
 
       const updated = [...tools];
       updated[index] = data;
@@ -556,7 +627,10 @@ export function AdminDashboard() {
 
     try {
       if (tool.id) {
-        const { error } = await supabase.from('tools').delete().eq('id', tool.id);
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'tools', id: tool.id }),
+        });
         if (error) throw error;
       }
 
@@ -570,6 +644,72 @@ export function AdminDashboard() {
   };
 
 
+  // Add new education
+  const addEducation = () => {
+    setEducation([
+      ...education,
+      {
+        degree: '',
+        institution: '',
+        field: '',
+        year: '',
+        visible: true,
+        sort_order: education.length,
+      },
+    ]);
+  };
+
+  // Save education
+  const saveEducation = async (edu: Education, index: number) => {
+    if (!user) return;
+    setSaving(true);
+
+    try {
+      const { data: apiData, error } = await apiCall<{ message: string; data: Education }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'education', data: edu }),
+      });
+
+      if (error) throw error;
+      const data = apiData?.data;
+      
+      if (!data) throw new Error('No data returned from API');
+
+      const updated = [...education];
+      updated[index] = data;
+      setEducation(updated);
+      showToast('success', 'Education saved!');
+    } catch (error: any) {
+      showToast('error', error.message || 'Failed to save education');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete education
+  const deleteEducation = async (edu: Education, index: number) => {
+    if (!confirm('Delete this education?')) return;
+
+    setSaving(true);
+
+    try {
+      if (edu.id) {
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'education', id: edu.id }),
+        });
+        if (error) throw error;
+      }
+
+      setEducation(education.filter((_, i) => i !== index));
+      showToast('success', 'Education deleted!');
+    } catch (error: any) {
+      showToast('error', error.message || 'Failed to delete education');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -581,6 +721,7 @@ export function AdminDashboard() {
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'profile', label: 'Profile', icon: '👤' },
     { id: 'experience', label: 'Experience', icon: '💼' },
+    { id: 'education', label: 'Education', icon: '🎓' },
     { id: 'certifications', label: 'Certifications', icon: '📜' },
     { id: 'skills', label: 'Skills', icon: '🛠️' },
     { id: 'projects', label: 'Projects', icon: '📁' },
@@ -589,16 +730,6 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg ${toast.type === 'success'
-          ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-          : 'bg-red-500/20 border border-red-500/30 text-red-400'
-          }`}>
-          {toast.message}
-        </div>
-      )}
-
       {/* Header */}
       <header className="sticky top-0 z-40 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -620,6 +751,38 @@ export function AdminDashboard() {
             >
               Logout
             </button>
+            <button
+              onClick={async () => {
+                if (!user) return;
+                if (!confirm('This will wipe existing data and re-seed from static JSON. Continue?')) return;
+                setLoading(true);
+                const res = await migrateData(user.id);
+                if (res.success) {
+                  showToast('success', 'Migration complete! Reloading...');
+                  window.location.reload();
+                } else {
+                  showToast('error', 'Migration failed. Check console.');
+                  setLoading(false);
+                }
+              }}
+              className="px-4 py-2 text-sm bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 rounded-lg hover:border-indigo-500/50 transition-all"
+            >
+              ⚡ Migrate Data
+            </button>
+            <button
+              onClick={async () => {
+                if (!confirm('This will publish ALL drafts to the live site. Continue?')) return;
+                setSaving(true);
+                const { error } = await apiCall('/api/admin/publish', { method: 'POST' });
+                if (error) showToast('error', error.message || 'Publish failed');
+                else showToast('success', 'Published successfully!');
+                setSaving(false);
+              }}
+              disabled={saving}
+              className="px-4 py-2 text-sm bg-green-500/20 text-green-400 hover:text-green-300 border border-green-500/30 rounded-lg hover:border-green-500/50 transition-all font-semibold"
+            >
+              rocket Publish Changes
+            </button>
           </div>
         </div>
       </header>
@@ -627,7 +790,7 @@ export function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <aside className="lg:w-64 shrink-0">
+          <aside className="lg:w-64 shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
             <nav className="space-y-1">
               {tabs.map((tab) => (
                 <button
@@ -653,7 +816,7 @@ export function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-white">Profile</h2>
                   <button
-                    onClick={saveProfile}
+                    onClick={() => saveProfile()}
                     disabled={saving}
                     className="btn-primary disabled:opacity-50"
                   >
@@ -959,6 +1122,116 @@ export function AdminDashboard() {
                         <span className="text-slate-300 text-sm">Visible</span>
                       </label>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Education Tab */}
+            {activeTab === 'education' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Education</h2>
+                  <button onClick={addEducation} className="btn-primary">
+                    + Add Education
+                  </button>
+                </div>
+
+                {education.map((edu, index) => (
+                  <div key={edu.id || index} className="glass-card p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-white">
+                        {edu.degree || 'New Education'}
+                      </h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveEducation(edu, index)}
+                          disabled={saving}
+                          className="px-3 py-1 text-sm bg-accent/20 text-accent rounded-lg hover:bg-accent/30"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => deleteEducation(edu, index)}
+                          className="px-3 py-1 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Degree</label>
+                        <input
+                          type="text"
+                          value={edu.degree}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[index].degree = e.target.value;
+                            setEducation(updated);
+                          }}
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Institution</label>
+                        <input
+                          type="text"
+                          value={edu.institution}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[index].institution = e.target.value;
+                            setEducation(updated);
+                          }}
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Field of Study</label>
+                        <input
+                          type="text"
+                          value={edu.field}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[index].field = e.target.value;
+                            setEducation(updated);
+                          }}
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Year</label>
+                        <input
+                          type="text"
+                          value={edu.year}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[index].year = e.target.value;
+                            setEducation(updated);
+                          }}
+                          placeholder="2019 - 2023"
+                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={edu.visible}
+                        onChange={(e) => {
+                          const updated = [...education];
+                          updated[index].visible = e.target.checked;
+                          setEducation(updated);
+                        }}
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
+                      />
+                      <span className="text-slate-300 text-sm">Visible</span>
+                    </label>
                   </div>
                 ))}
               </div>
@@ -1346,17 +1619,30 @@ export function AdminDashboard() {
                             placeholder="Category (e.g., Development)"
                             className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent"
                           />
-                          <input
-                            type="text"
-                            value={tool.icon}
-                            onChange={(e) => {
-                              const updated = [...tools];
-                              updated[index].icon = e.target.value;
-                              setTools(updated);
-                            }}
-                            placeholder="Icon (emoji)"
-                            className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm text-center focus:outline-none focus:border-accent"
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={tool.icon}
+                              onChange={(e) => {
+                                const updated = [...tools];
+                                updated[index].icon = e.target.value;
+                                setTools(updated);
+                              }}
+                              placeholder="Icon URL (🪄 for auto)"
+                              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent pr-8"
+                            />
+                            <button
+                              onClick={() => {
+                                if (!tool.name) return;
+                                // In a real app, this would call an API
+                                // For now, we'll just check if there's a name
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-lg hover:scale-110 transition-transform"
+                              title="Auto-fetch icon"
+                            >
+                              🪄
+                            </button>
+                          </div>
                         </div>
 
                         <textarea
@@ -1366,11 +1652,10 @@ export function AdminDashboard() {
                             updated[index].description = e.target.value;
                             setTools(updated);
                           }}
-                          placeholder="Brief description (1-2 lines for hover tooltip)"
-                          rows={2}
-                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm resize-none focus:outline-none focus:border-accent"
+                          placeholder="Description..."
+                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent resize-none h-20"
                         />
-
+                        
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
@@ -1382,7 +1667,7 @@ export function AdminDashboard() {
                             }}
                             className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
                           />
-                          <span className="text-slate-400 text-sm">Visible on public site</span>
+                          <span className="text-slate-400 text-sm">Visible</span>
                         </label>
                       </div>
                     </div>

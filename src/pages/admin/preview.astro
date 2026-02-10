@@ -1,0 +1,57 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PortfolioHome from '../../components/PortfolioHome.astro';
+import { getPortfolioData } from '../../lib/data';
+import { createSupabaseServerClient } from '../../lib/supabase-server';
+
+// Server-side auth check
+const supabase = createSupabaseServerClient(Astro);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/admin');
+}
+
+// Fetch DRAFT data
+const data = await getPortfolioData(supabase, true);
+const profile = data.profile;
+---
+
+{profile ? (
+  <Layout
+    title="Preview Results"
+    description={profile.tagline || 'Portfolio Preview'}
+    profileData={data}
+  >
+    <!-- Preview Banner -->
+    <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500/90 text-amber-950 px-6 py-3 text-center font-bold flex justify-between items-center backdrop-blur-md shadow-lg">
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+        <span>PREVIEW MODE — Viewing unpublished drafts</span>
+      </div>
+      <a 
+        href="/admin/dashboard" 
+        class="bg-black/10 hover:bg-black/20 px-4 py-1.5 rounded-lg text-sm transition-all border border-black/5 font-semibold"
+      >
+        Exit Preview
+      </a>
+    </div>
+
+    <!-- Content Wrapper with Padding for Banner -->
+    <div class="pt-12">
+      <PortfolioHome data={data} />
+    </div>
+  </Layout>
+) : (
+  <Layout title="Empty Preview">
+    <div class="min-h-screen flex items-center justify-center bg-[#0a0a0f] text-white">
+      <div class="text-center p-8 glass-card max-w-md">
+        <h1 class="text-2xl font-bold mb-4">Draft Data Empty</h1>
+        <p class="text-slate-400 mb-6">No draft data found to preview. Please save some changes in the dashboard first.</p>
+        <a href="/admin/dashboard" class="btn-primary inline-flex">Go to Dashboard</a>
+      </div>
+    </div>
+  </Layout>
+)}

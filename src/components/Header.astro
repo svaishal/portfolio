@@ -1,129 +1,113 @@
 ---
-import data from '../data/data.json';
+import { getSocialUrl } from '../lib/data';
+
+interface Props {
+  profile?: any;
+  socialLinks?: any[];
+}
+
+const { profile, socialLinks } = Astro.props;
+const currentPath = Astro.url.pathname;
 
 const navItems = [
-  { name: 'Home', path: '/' },
-  { name: 'About', path: '/about' },
-  { name: 'Experience', path: '/experience' },
-  { name: 'Portfolio', path: '/portfolio' },
-  { name: 'Contact', path: '/contact' }
+  { name: "Home", path: "/" },
+  { name: "About", path: "/about" },
+  { name: "Experience", path: "/experience" },
+  { name: "Portfolio", path: "/portfolio" },
+  { name: "Contact", path: "/contact" },
 ];
 
-const currentPath = Astro.url.pathname;
+const name = profile?.name || 'Portfolio';
+const initial = name.charAt(0);
 ---
 
-<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="header">
-  <div class="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5"></div>
-  
-  <nav class="relative container mx-auto px-6 py-4">
-    <div class="flex items-center justify-between">
-      <!-- Logo/Name -->
-      <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white font-bold text-lg transition-all group-hover:bg-accent/90">
-          {data.personal.name.charAt(0)}
-        </div>
-        <span class="font-semibold text-white hidden sm:block">{data.personal.name}</span>
-      </a>
-      
-      <!-- Desktop Navigation -->
-      <ul class="hidden md:flex items-center gap-1">
-        {navItems.map(item => (
-          <li>
-            <a
-              href={item.path}
-              class={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                currentPath === item.path 
-                  ? 'text-white bg-white/10' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {item.name}
-              {currentPath === item.path && (
-                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent"></span>
-              )}
-            </a>
-          </li>
-        ))}
-      </ul>
+<header class="fixed top-0 left-0 right-0 z-50 h-[var(--nav-height)] border-b border-white/5 bg-[#050505]/80 backdrop-blur-md transition-all duration-300">
+  <div class="max-w-[var(--max-width)] mx-auto px-6 h-full flex items-center justify-between">
+    
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="relative w-10 h-10 rounded-xl bg-surface border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-colors">
+        {profile?.profile_photo_url ? (
+          <img src={profile.profile_photo_url} alt={name} class="w-full h-full object-cover" />
+        ) : (
+          <span class="font-bold text-white group-hover:text-primary transition-colors">{initial}</span>
+        )}
+      </div>
+      <span class="font-semibold text-text-main hidden sm:block group-hover:text-white transition-colors">
+        {name}
+      </span>
+    </a>
 
-      <!-- CTA Button -->
+    <!-- Desktop Nav -->
+    <nav class="hidden md:flex items-center gap-1 bg-surface/50 p-1 rounded-full border border-white/5 backdrop-blur-sm">
+      {navItems.map(item => (
+        <a 
+          href={item.path} 
+          class={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+            currentPath === item.path 
+              ? 'bg-white/10 text-white shadow-sm' 
+              : 'text-text-muted hover:text-white hover:bg-white/5'
+          }`}
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Actions -->
+    <div class="hidden md:flex items-center gap-3">
+      <a 
+        href="/api/resume" 
+        target="_blank"
+        class="btn-secondary !px-4 !py-2 !text-sm !h-10"
+      >
+        Resume
+      </a>
       <a 
         href="/contact" 
-        class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors"
+        class="btn-primary !px-4 !py-2 !text-sm !h-10"
       >
-        <span>Let's Talk</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
+        Let's Talk
       </a>
-
-      <!-- Mobile Menu Button -->
-      <button 
-        class="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
-        id="mobile-menu-btn"
-        aria-label="Toggle menu"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
     </div>
 
-    <!-- Mobile Navigation -->
-    <div class="md:hidden hidden mt-4 pb-4 border-t border-white/5 pt-4" id="mobile-menu">
-      <ul class="flex flex-col gap-2">
-        {navItems.map(item => (
-          <li>
-            <a
-              href={item.path}
-              class={`block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                currentPath === item.path 
-                  ? 'text-white bg-white/10' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {item.name}
-            </a>
-          </li>
-        ))}
-        <li class="mt-2">
-          <a 
-            href="/contact" 
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent/90 transition-colors"
-          >
-            <span>Let's Talk</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
-        </li>
-      </ul>
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-btn" class="md:hidden p-2 text-text-muted hover:text-white">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="fixed inset-0 top-[var(--nav-height)] bg-background z-40 hidden flex-col p-6 animate-fade-in">
+    <div class="flex flex-col gap-4">
+      {navItems.map(item => (
+        <a 
+          href={item.path} 
+          class={`text-lg font-medium py-3 border-b border-white/5 ${
+            currentPath === item.path ? 'text-primary' : 'text-text-muted'
+          }`}
+        >
+          {item.name}
+        </a>
+      ))}
+      <div class="flex flex-col gap-3 mt-4">
+        <a href="/api/resume" target="_blank" class="btn-secondary w-full justify-center">Download Resume</a>
+        <a href="/contact" class="btn-primary w-full justify-center">Let's Talk</a>
+      </div>
     </div>
-  </nav>
+  </div>
 </header>
 
 <script>
-  // Mobile menu toggle
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
   
-  mobileMenuBtn?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
-  });
-
-  // Header background on scroll
-  const header = document.getElementById('header');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header?.classList.add('scrolled');
-    } else {
-      header?.classList.remove('scrolled');
-    }
-  });
-</script>
-
-<style>
-  #header.scrolled {
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  if (btn && menu) {
+    btn.addEventListener('click', () => {
+      menu.classList.toggle('hidden');
+      menu.classList.toggle('flex');
+    });
   }
-</style>
+</script>

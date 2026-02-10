@@ -39,7 +39,7 @@ function sanitizeFilename(filename: string): string {
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Verify authentication
-    const { valid, session } = await verifySession(cookies);
+    const { valid, session } = await verifySession({ request, cookies });
     
     if (!valid || !session) {
       return new Response(
@@ -97,7 +97,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
 
     // Create Supabase client
-    const supabase = createSupabaseServerClient(cookies);
+    const supabase = createSupabaseServerClient({ request, cookies });
 
     // Generate safe file path
     const timestamp = Date.now();

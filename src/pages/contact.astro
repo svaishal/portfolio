@@ -2,23 +2,25 @@
 import Layout from '../layouts/Layout.astro';
 import { getPortfolioData, getSocialUrl } from '../lib/data';
 
-// Fetch portfolio data (Supabase or fallback to local JSON)
+// Fetch portfolio data
 const data = await getPortfolioData();
-const profile = data.profile!;
+const profile = data.profile;
 const githubUrl = getSocialUrl(data.socialLinks, 'github');
 const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
 ---
 
+{profile ? (
 <Layout
   title="Contact"
   description="Get in touch for opportunities, collaborations, or technical discussions"
+  profileData={data}
 >
   <!-- Hero Section -->
   <section class="pt-32 pb-16 px-6 relative overflow-hidden">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-0 left-1/4 w-96 h-96 bg-slate-500/5 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-slate-600/5 rounded-full blur-3xl"></div>
+      <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
+      <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-900/10 rounded-full blur-[80px] animate-pulse" style="animation-delay: 1s;"></div>
     </div>
 
     <div class="relative z-10 max-w-4xl mx-auto text-center">
@@ -27,7 +29,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
           Let's Connect
         </h1>
-        <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+        <p class="text-xl text-text-muted max-w-2xl mx-auto font-light leading-relaxed">
           Have a question or want to discuss opportunities? I'd love to hear from you. I typically respond within 24 hours.
         </p>
       </div>
@@ -41,19 +43,24 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
         <!-- Contact Form -->
         <div class="lg:col-span-3" data-animate>
           <div class="glass-card p-8 md:p-10">
-            <h2 class="text-2xl font-bold text-white mb-6">Send a Message</h2>
+            <h2 class="text-2xl font-bold text-white mb-8">Send a Message</h2>
             
             <form
               class="space-y-6"
               id="contact-form"
             >
               <!-- Error Message (hidden by default) -->
-              <div id="error-message" class="hidden p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"></div>
+              <div id="error-message" class="hidden p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span></span>
+              </div>
 
               <div class="grid sm:grid-cols-2 gap-6">
                 <div>
-                  <label for="name" class="block text-sm font-medium text-slate-300 mb-2">
-                    Name <span class="text-red-400">*</span>
+                  <label for="name" class="block text-sm font-medium text-text-muted mb-2">
+                    Name <span class="text-primary">*</span>
                   </label>
                   <input
                     type="text"
@@ -61,14 +68,14 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                     name="name"
                     required
                     maxlength="100"
-                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-white placeholder-slate-500"
+                    class="w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-white placeholder-text-dim"
                     placeholder="Your name"
                   />
                 </div>
 
                 <div>
-                  <label for="email" class="block text-sm font-medium text-slate-300 mb-2">
-                    Email <span class="text-red-400">*</span>
+                  <label for="email" class="block text-sm font-medium text-text-muted mb-2">
+                    Email <span class="text-primary">*</span>
                   </label>
                   <input
                     type="email"
@@ -76,15 +83,15 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                     name="email"
                     required
                     maxlength="320"
-                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-white placeholder-slate-500"
+                    class="w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-white placeholder-text-dim"
                     placeholder="your.email@example.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label for="subject" class="block text-sm font-medium text-slate-300 mb-2">
-                  Subject <span class="text-red-400">*</span>
+                <label for="subject" class="block text-sm font-medium text-text-muted mb-2">
+                  Subject <span class="text-primary">*</span>
                 </label>
                 <input
                   type="text"
@@ -92,14 +99,14 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                   name="subject"
                   required
                   maxlength="200"
-                  class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-white placeholder-slate-500"
+                  class="w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-white placeholder-text-dim"
                   placeholder="What would you like to discuss?"
                 />
               </div>
 
               <div>
-                <label for="message" class="block text-sm font-medium text-slate-300 mb-2">
-                  Message <span class="text-red-400">*</span>
+                <label for="message" class="block text-sm font-medium text-text-muted mb-2">
+                  Message <span class="text-primary">*</span>
                 </label>
                 <textarea
                   id="message"
@@ -107,7 +114,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                   rows="5"
                   required
                   maxlength="5000"
-                  class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all resize-none text-white placeholder-slate-500"
+                  class="w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none text-white placeholder-text-dim"
                   placeholder="Tell me more about your inquiry..."
                 ></textarea>
               </div>
@@ -123,31 +130,39 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
               <button
                 type="submit"
                 id="submit-button"
-                class="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                <span id="submit-text">Send Message</span>
-                <span id="submit-loading" class="hidden flex items-center gap-2">
+                <span id="submit-text" class="flex items-center justify-center gap-2">
+                  Send Message
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </span>
+                <span id="submit-loading" class="hidden flex items-center justify-center gap-2">
                   <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                   Sending...
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" id="submit-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
               </button>
             </form>
 
             <!-- Success Message (hidden by default) -->
-            <div id="success-message" class="hidden text-center py-12">
-              <div class="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div id="success-message" class="hidden text-center py-12 animate-fade-in">
+              <div class="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 class="text-xl font-bold text-white mb-2">Message Sent!</h3>
-              <p class="text-slate-400">Thank you for reaching out. I'll get back to you soon.</p>
+              <h3 class="text-2xl font-bold text-white mb-2">Message Sent!</h3>
+              <p class="text-text-muted mb-8">Thank you for reaching out. I'll get back to you soon.</p>
+              <button 
+                onclick="window.location.reload()" 
+                class="btn-secondary"
+              >
+                Send Another Message
+              </button>
             </div>
           </div>
         </div>
@@ -161,41 +176,41 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
             <div class="space-y-6">
               <!-- Location -->
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
                 <div>
                   <h3 class="text-white font-medium mb-1">Location</h3>
-                  <p class="text-slate-400">{profile.location}</p>
+                  <p class="text-text-muted">{profile.location}</p>
                 </div>
               </div>
 
               <!-- Response Time -->
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <h3 class="text-white font-medium mb-1">Response Time</h3>
-                  <p class="text-slate-400">Within 24 hours</p>
+                  <p class="text-text-muted">Within 24 hours</p>
                 </div>
               </div>
 
               <!-- Availability -->
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <h3 class="text-white font-medium mb-1">Availability</h3>
-                  <p class="text-slate-400">{profile.open_to_work ? 'Open to opportunities' : 'Not currently looking'}</p>
+                  <p class="text-text-muted">{profile.open_to_work ? 'Open to opportunities' : 'Not currently looking'}</p>
                 </div>
               </div>
             </div>
@@ -210,7 +225,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                 href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-accent/50 hover:bg-white/10 transition-all group"
+                class="flex items-center gap-4 p-4 bg-surface border border-white/5 rounded-xl hover:border-primary/50 hover:bg-white/5 transition-all group"
               >
                 <div class="w-10 h-10 rounded-lg bg-[#0077b5]/20 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#0077b5]" fill="currentColor" viewBox="0 0 24 24">
@@ -218,10 +233,10 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-white font-medium group-hover:text-accent transition-colors">LinkedIn</p>
-                  <p class="text-slate-500 text-sm">Connect professionally</p>
+                  <p class="text-white font-medium group-hover:text-primary transition-colors">LinkedIn</p>
+                  <p class="text-text-muted text-sm">Connect professionally</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-text-dim group-hover:text-primary group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </a>
@@ -230,7 +245,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                 href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-accent/50 hover:bg-white/10 transition-all group"
+                class="flex items-center gap-4 p-4 bg-surface border border-white/5 rounded-xl hover:border-primary/50 hover:bg-white/5 transition-all group"
               >
                 <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -238,10 +253,10 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-white font-medium group-hover:text-accent transition-colors">GitHub</p>
-                  <p class="text-slate-500 text-sm">Check out my code</p>
+                  <p class="text-white font-medium group-hover:text-primary transition-colors">GitHub</p>
+                  <p class="text-text-muted text-sm">Check out my code</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500 group-hover:text-accent group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-text-dim group-hover:text-primary group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </a>
@@ -260,7 +275,7 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
                 </div>
                 <div>
                   <p class="text-white font-medium">Currently Available</p>
-                  <p class="text-slate-400 text-sm">Open for new opportunities</p>
+                  <p class="text-text-muted text-sm">Open for new opportunities</p>
                 </div>
               </div>
             </div>
@@ -275,28 +290,46 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-12" data-animate>
         <p class="section-title">FAQ</p>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white">Common Questions</h2>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">Common Questions</h2>
       </div>
 
       <div class="space-y-4" data-animate>
-        <div class="glass-card p-6 hover:border-accent/30 transition-all">
-          <h3 class="text-lg font-semibold text-white mb-2">What type of roles are you looking for?</h3>
-          <p class="text-slate-400">I'm interested in Technical Support, IT Infrastructure, or Help Desk roles where I can leverage my experience in enterprise support and customer service.</p>
+        <div class="glass-card p-6 hover:border-primary/30 transition-all">
+          <h3 class="text-lg font-bold text-white mb-2">What type of roles are you looking for?</h3>
+          <p class="text-text-muted">I'm interested in Technical Support, IT Infrastructure, or Help Desk roles where I can leverage my experience in enterprise support and customer service.</p>
         </div>
 
-        <div class="glass-card p-6 hover:border-accent/30 transition-all">
-          <h3 class="text-lg font-semibold text-white mb-2">Are you open to remote work?</h3>
-          <p class="text-slate-400">Yes, I'm comfortable with remote, hybrid, or on-site arrangements. My experience includes supporting remote teams and working across different time zones.</p>
+        <div class="glass-card p-6 hover:border-primary/30 transition-all">
+          <h3 class="text-lg font-bold text-white mb-2">Are you open to remote work?</h3>
+          <p class="text-text-muted">Yes, I'm comfortable with remote, hybrid, or on-site arrangements. My experience includes supporting remote teams and working across different time zones.</p>
         </div>
 
-        <div class="glass-card p-6 hover:border-accent/30 transition-all">
-          <h3 class="text-lg font-semibold text-white mb-2">What's your notice period?</h3>
-          <p class="text-slate-400">Please reach out to discuss availability and timeline. I'm flexible and can work with reasonable notice periods.</p>
+        <div class="glass-card p-6 hover:border-primary/30 transition-all">
+          <h3 class="text-lg font-bold text-white mb-2">What's your notice period?</h3>
+          <p class="text-text-muted">Please reach out to discuss availability and timeline. I'm flexible and can work with reasonable notice periods.</p>
         </div>
       </div>
     </div>
   </section>
 </Layout>
+) : (
+<Layout title="Setup Required">
+  <div class="min-h-screen flex items-center justify-center bg-background text-white p-6">
+    <div class="text-center max-w-md w-full glass-card p-8">
+      <div class="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold mb-4">Portfolio Setup Required</h1>
+      <p class="text-text-muted mb-8">Please log in to the admin dashboard to migrate data.</p>
+      <a href="/admin" class="btn-primary w-full justify-center">
+        Go to Admin Dashboard
+      </a>
+    </div>
+  </div>
+</Layout>
+)}
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
@@ -307,11 +340,10 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
   const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
   const submitText = document.getElementById('submit-text');
   const submitLoading = document.getElementById('submit-loading');
-  const submitIcon = document.getElementById('submit-icon');
 
   function showError(message: string) {
     if (errorMessage) {
-      errorMessage.textContent = message;
+      errorMessage.querySelector('span')!.textContent = message;
       errorMessage.classList.remove('hidden');
     }
   }
@@ -323,7 +355,6 @@ const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');
   function setLoading(loading: boolean) {
     if (submitButton) submitButton.disabled = loading;
     submitText?.classList.toggle('hidden', loading);
-    submitIcon?.classList.toggle('hidden', loading);
     submitLoading?.classList.toggle('hidden', !loading);
   }
 

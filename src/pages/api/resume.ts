@@ -23,10 +23,11 @@ export const GET: APIRoute = async ({ request }) => {
     const certifications = data.certifications || [];
     const education = data.education || [];
     const skills = data.technicalSkills || [];
+    const projects = data.projects || [];
 
 
     // Generate ATS-safe HTML resume
-    const html = generateATSResumeHTML(profile, experiences, tools, certifications, education, skills);
+    const html = generateATSResumeHTML(profile, experiences, tools, certifications, education, skills, projects);
 
 
     // Return HTML with proper headers to trigger download
@@ -54,7 +55,8 @@ function generateATSResumeHTML(
   tools: any[],
   certifications: any[],
   education: any[],
-  skills: any[]
+  skills: any[],
+  projects: any[]
 ): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -188,6 +190,31 @@ function generateATSResumeHTML(
       : ''
     }
   
+    }
+
+  <!-- Projects -->
+  ${projects.length > 0
+      ? `<div class="section">
+    <h2>Key Projects</h2>
+    ${projects
+        .map(
+          (proj) => `
+    <div style="margin-bottom: 8pt;">
+      <div class="job-header">
+        <span class="job-title">${proj.title}</span>
+      </div>
+      <p>${proj.description}</p>
+      <ul>
+        ${proj.highlights.map((h: string) => `<li>${h}</li>`).join('')}
+      </ul>
+      ${proj.impact ? `<p><strong>Impact:</strong> ${proj.impact}</p>` : ''}
+    </div>`
+        )
+        .join('')}
+  </div>`
+      : ''
+    }
+
   <!-- Technical Skills -->
   ${skills.length > 0
       ? `<div class="section">

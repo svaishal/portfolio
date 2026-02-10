@@ -1,5 +1,4 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import fallbackData from '../data/data.json';
 
 // Type definitions for fetched data
 export interface Profile {
@@ -107,111 +106,16 @@ export interface PortfolioData {
   learning: Learning[];
 }
 
-// Fallback data transformer
-function getFallbackData(): PortfolioData {
-  const data = fallbackData as any;
-
-  return {
-    profile: {
-      id: 'fallback',
-      name: data.personal.name,
-      role: data.personal.role,
-      tagline: data.personal.tagline,
-      subtitle: data.personal.subtitle,
-      location: data.personal.location,
-      years_experience: data.personal.yearsExperience,
-      bio: data.personal.bio,
-      about_intro: data.personal.aboutNarrative?.intro || '',
-      about_values: data.personal.aboutNarrative?.values || '',
-      open_to_work: data.personal.openToWork,
-      profile_photo_url: null,
-    },
-    experiences: data.experience.map((exp: any, index: number) => ({
-      id: exp.id || `exp-${index}`,
-      company: exp.company,
-      role: exp.role,
-      period: exp.period,
-      type: exp.type,
-      icon: exp.icon || '💼',
-      achievements: exp.achievements,
-      skills: exp.skills || [],
-      is_current: exp.current,
-      sort_order: index,
-    })),
-    certifications: data.certifications.map((cert: any, index: number) => ({
-      id: `cert-${index}`,
-      name: typeof cert === 'string' ? cert : cert.name,
-      icon: typeof cert === 'string' ? '📜' : (cert.icon || '📜'),
-      issuer: null,
-      date: null,
-      url: null,
-    })),
-    technicalSkills: data.skills.technical.map((skill: string, index: number) => ({
-      id: `tech-${index}`,
-      name: skill,
-      category: 'technical' as const,
-    })),
-    softSkills: data.skills.soft.map((skill: string, index: number) => ({
-      id: `soft-${index}`,
-      name: skill,
-      category: 'soft' as const,
-    })),
-    projects: data.projects.map((proj: any, index: number) => ({
-      id: proj.id || `proj-${index}`,
-      title: proj.title,
-      description: proj.description,
-      category: proj.category,
-      icon: proj.icon || '📁',
-      highlights: proj.highlights,
-      impact: proj.impact,
-      image_url: null,
-      link: null,
-    })),
-    journeyPhases: data.personal.aboutNarrative?.journey?.map((phase: any, index: number) => ({
-      id: `phase-${index}`,
-      phase: phase.phase,
-      description: phase.description,
-      sort_order: index,
-    })) || [],
-    education: data.education.map((edu: any, index: number) => ({
-      id: `edu-${index}`,
-      degree: edu.degree,
-      institution: edu.institution,
-      field: edu.field,
-      year: edu.year,
-    })),
-    socialLinks: [
-      { id: 'github', platform: 'github', url: data.social?.github || `https://github.com/${data.personal.github}` },
-      { id: 'linkedin', platform: 'linkedin', url: data.social?.linkedin || data.personal.linkedin },
-    ],
-    tools: (data.tools || []).map((tool: any, index: number) => ({
-      id: `tool-${index}`,
-      name: tool.name,
-      category: tool.category,
-      description: tool.description,
-      icon: tool.icon || 'default',
-    })),
-    learning: (data.learning || []).map((item: any, index: number) => ({
-      id: `learn-${index}`,
-      name: item.name,
-      description: item.description,
-      status: item.status || 'in-progress',
-    })),
-  };
-}
-
 // Fetch all portfolio data
-export async function getPortfolioData(): Promise<PortfolioData> {
-  // TEMPORARY: Force fallback data for local development
-  // TODO: Re-enable Supabase once database is populated
-  console.log('Using fallback data from data.json');
-  return getFallbackData();
-
-  /* Original Supabase logic (disabled temporarily)
-  if (!isSupabaseConfigured) {
-    console.log('Supabase not configured, using fallback data');
-    return getFallbackData();
+export async function getPortfolioData(client?: any, useDraft = false): Promise<PortfolioData> {
+  const sb = client || supabase;
+  
+  if (!client && !isSupabaseConfigured) {
+    console.error('Supabase not configured');
+    return getEmptyData();
   }
+
+  const table = (name: string) => useDraft ? `${name}_draft` : name;
 
   try {
     // Fetch all data in parallel
@@ -227,23 +131,27 @@ export async function getPortfolioData(): Promise<PortfolioData> {
       toolsResult,
       learningResult,
     ] = await Promise.all([
-      supabase.from('profiles').select('*').limit(1).single(),
-      supabase.from('experiences').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('certifications').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('skills').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('projects').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('journey_phases').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('education').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('social_links').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('tools').select('*').eq('visible', true).order('sort_order', { ascending: true }),
-      supabase.from('learning').select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('profiles')).select('*').single(),
+      sb.from(table('experiences')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('certifications')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('skills')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('projects')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('journey_phases')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('education')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('social_links')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('tools')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
+      sb.from(table('learning')).select('*').eq('visible', true).order('sort_order', { ascending: true }),
     ]);
 
     // Check if we got data from Supabase
     if (profileResult.error || !profileResult.data) {
-      console.log('No profile found in Supabase, using fallback data');
-      return getFallbackData();
+      console.error('No profile found in Supabase', profileResult.error);
+      return getEmptyData();
     }
+
+    // Cast data (draft tables might return slightly different types if stricter, but usually compatible)
+    // Note: 'any' cast used because draft tables aren't in Database types effectively here unless generic?
+    // But runtime data is compatible.
 
     const skills = skillsResult.data || [];
 
@@ -251,10 +159,10 @@ export async function getPortfolioData(): Promise<PortfolioData> {
       profile: profileResult.data as Profile,
       experiences: (experiencesResult.data || []) as Experience[],
       certifications: (certificationsResult.data || []) as Certification[],
-      technicalSkills: skills.filter(s => s.category === 'technical') as Skill[],
-      softSkills: skills.filter(s => s.category === 'soft') as Skill[],
+      technicalSkills: (skills as any[]).filter(s => s.category === 'technical') as Skill[],
+      softSkills: (skills as any[]).filter(s => s.category === 'soft') as Skill[],
       projects: (projectsResult.data || []) as Project[],
-      journeyPhases: (journeyResult.data || []) as JourneyPhase[],
+      journeyPhases: (journeyResult.data || []) as unknown as JourneyPhase[],
       education: (educationResult.data || []) as Education[],
       socialLinks: (socialResult.data || []) as SocialLink[],
       tools: (toolsResult.data || []) as Tool[],
@@ -262,9 +170,24 @@ export async function getPortfolioData(): Promise<PortfolioData> {
     };
   } catch (error) {
     console.error('Error fetching from Supabase:', error);
-    return getFallbackData();
+    return getEmptyData();
   }
-  */
+}
+
+function getEmptyData(): PortfolioData {
+  return {
+    profile: null,
+    experiences: [],
+    certifications: [],
+    technicalSkills: [],
+    softSkills: [],
+    projects: [],
+    journeyPhases: [],
+    education: [],
+    socialLinks: [],
+    tools: [],
+    learning: [],
+  };
 }
 
 // Get specific social link

@@ -1,40 +1,56 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
     extend: {
       colors: {
-        accent: '#0070FF',        // Electric blue
-        secondary: '#505050',     // Secondary gray
-        success: '#10B981',       // Green
-        highlight: '#0070FF',     // Electric blue
-        obsidian: {
-          bg: '#050505',          // Background
-          surface: '#121212',     // Cards/Surface
-          border: 'rgba(80, 80, 80, 0.3)', // Borders
+        // Strict Landa Palette
+        background: '#050505',    // Deepest black
+        surface: '#121212',       // Card background
+        primary: '#0070FF',       // Electric Blue (CTA)
+        'primary-hover': '#338CFF', // Lighter blue for hover
+        secondary: '#505050',     // Neutral elements
+        text: {
+          main: '#F5F5F7',        // Primary text
+          muted: '#A1A1A6',       // Secondary text
+          dim: '#6E6E73',         // Tertiary text
         },
-        neutral: {
-          50: '#F5F5F7',          // Text primary
-          100: '#E5E5E7',         // Light gray
-          200: '#C5C5C7',         // Gray
-          300: '#A1A1A6',         // Medium gray
-          400: '#86868B',         // Darker gray
-          500: '#505050',         // Secondary accent
-          600: '#3A3A3C',         // Very dark gray
-          900: '#121212',         // Surface
-          950: '#050505',         // Background
+        border: 'rgba(255, 255, 255, 0.1)', // Subtle borders
+        
+        // Aliases for compatibility (mapped to new palette)
+        accent: '#0070FF',
+        obsidian: {
+          bg: '#050505',
+          surface: '#121212',
+          border: 'rgba(255, 255, 255, 0.1)',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['Fira Code', 'monospace'],
       },
       backdropBlur: {
         xs: '2px',
+        md: '12px',
+        lg: '24px',
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      boxShadow: {
+        'glow': '0 0 20px rgba(0, 112, 255, 0.15)',
+        'glow-hover': '0 0 30px rgba(0, 112, 255, 0.25)',
+        'card': '0 8px 32px rgba(0, 0, 0, 0.4)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        }
       }
     },
   },

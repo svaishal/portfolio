@@ -89,5 +89,7 @@ const securityHeaders = defineMiddleware(async ({ request }, next) => {
   return response;
 });
 
+import { rateLimit } from './middleware/rateLimit';
+
 // Export combined middleware
-export const onRequest = sequence(csrfProtection, authProtection, securityHeaders);
+export const onRequest = sequence(csrfProtection, rateLimit, authProtection, securityHeaders);

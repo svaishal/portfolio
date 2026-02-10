@@ -4,9 +4,10 @@ import { getPortfolioData } from '../lib/data';
 
 // Fetch portfolio data (Supabase or fallback to local JSON)
 const data = await getPortfolioData();
-const profile = data.profile!;
+const profile = data.profile;
 ---
 
+{profile ? (
 <Layout
   title="Experience"
   description="Professional experience in IT support, from ERP systems to enterprise helpdesk"
@@ -190,3 +191,16 @@ const profile = data.profile!;
     </div>
   </section>
 </Layout>
+) : (
+<Layout title="Setup Required">
+  <div class="min-h-screen flex items-center justify-center bg-[#0a0a0f] text-white">
+    <div class="text-center p-8">
+      <h1 class="text-4xl font-bold mb-4">Portfolio Setup Required</h1>
+      <p class="text-slate-400 mb-8">Please log in to the admin dashboard to migrate data.</p>
+      <a href="/admin" class="px-6 py-3 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+        Go to Admin
+      </a>
+    </div>
+  </div>
+</Layout>
+)}
