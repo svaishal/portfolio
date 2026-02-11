@@ -52,7 +52,7 @@ export function useAutoSaveObject<T>(
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasPendingChanges || isSaving) {
         e.preventDefault();
-        e.returnValue = '';
+        // e.returnValue is deprecated and not needed for modern browsers
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -127,12 +127,12 @@ export function useAutoSaveList<T>(
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (pendingIndices.current.size > 0 || savingIndices.size > 0) {
         e.preventDefault();
-        e.returnValue = '';
+        // e.returnValue is deprecated
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [savingIndices]); // pendingIndices is ref, so we depend on savingIndices which updates
+  }, [savingIndices]);
 
   return { savingIndices };
 }

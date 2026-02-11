@@ -6,6 +6,12 @@ import ToolsGrid from '../components/ToolsGrid.astro';
 // Fetch portfolio data (Supabase or fallback to local JSON)
 const data = await useProfileData();
 const profile = data.profile;
+
+// Enable Edge Caching (Hyperscale Fix P0)
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400'
+);
 ---
 
 {profile ? (
@@ -138,11 +144,11 @@ const profile = data.profile;
       <div class="glass-card p-12 bg-surface/50 border-white/5" data-animate>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <p class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2">99.5%</p>
+            <p class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-white mb-2">99.5%</p>
             <p class="text-text-muted text-sm uppercase tracking-wider font-medium">Uptime Achieved</p>
           </div>
           <div>
-            <p class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2">30%</p>
+            <p class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-white mb-2">30%</p>
             <p class="text-text-muted text-sm uppercase tracking-wider font-medium">Faster Response</p>
           </div>
           <div>

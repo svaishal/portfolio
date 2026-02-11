@@ -8,9 +8,12 @@ import { useProfileData } from '../hooks/useProfileData';
 // Fetch portfolio data
 const data = await useProfileData();
 const profile = data.profile;
-// const githubUrl... (moved to PortfolioHome, not needed here unless used in Layout?)
-// Layout takes profileData={data}.
-// Let's check Layout usage.
+
+// Enable Edge Caching (Hyperscale Fix P0)
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400'
+);
 ---
 
 {profile ? (

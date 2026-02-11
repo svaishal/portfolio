@@ -8,6 +8,12 @@ import CertificationCard from '../components/CertificationCard.astro';
 // Fetch portfolio data (Supabase or fallback to local JSON)
 const data = await useProfileData();
 const profile = data.profile;
+
+// Enable Edge Caching (Hyperscale Fix P0)
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400'
+);
 ---
 
 {profile ? (

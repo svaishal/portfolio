@@ -9,6 +9,12 @@ import StatsCard from '../components/StatsCard.astro';
 // Fetch portfolio data
 const data = await useProfileData();
 const profile = data.profile;
+
+// Enable Edge Caching (Hyperscale Fix P0)
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400'
+);
 ---
 
 {profile ? (
@@ -185,10 +191,10 @@ const profile = data.profile;
       <div class="glass-card p-12 bg-surface/50 border-white/5" data-animate>
         <StatsCard
           stats={[
-            { value: '99.5%', label: 'Uptime Achieved', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' },
-            { value: '30%', label: 'Faster Response', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' },
-            { value: '40%', label: 'Fewer Tickets', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' },
-            { value: '95%+', label: 'Satisfaction', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' }
+            { value: '99.5%', label: 'Uptime Achieved', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-white mb-2' },
+            { value: '30%', label: 'Faster Response', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-white mb-2' },
+            { value: '40%', label: 'Fewer Tickets', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-white mb-2' },
+            { value: '95%+', label: 'Satisfaction', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-white mb-2' }
           ]}
         />
       </div>
