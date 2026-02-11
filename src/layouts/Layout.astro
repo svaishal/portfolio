@@ -38,7 +38,7 @@ const siteTitle = `${title} | ${profile?.name || 'Portfolio'}`;
   <link rel="canonical" href={canonicalURL}>
   <meta name="author" content={profile?.name || 'Vaishal S'}>
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#050505">
 
   <meta property="og:type" content="website">
   <meta property="og:url" content={canonicalURL}>
@@ -65,27 +65,58 @@ const siteTitle = `${title} | ${profile?.name || 'Portfolio'}`;
   
   <Header profile={profile} socialLinks={socialLinks} />
   
-  <main class="flex-1 w-full max-w-[var(--max-width)] mx-auto px-6 pt-[var(--nav-height)]">
+  <main class="flex-1 w-full max-w-(--max-width) mx-auto px-6 pt-[calc(var(--nav-height)+2rem)]">
     <slot />
   </main>
   
   <Footer profile={profile} socialLinks={socialLinks} />
   
   <script>
-    // Simple Intersection Observer for data-animate elements
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.remove('opacity-0', 'translate-y-8');
-          observer.unobserve(entry.target);
-        }
+    // Enhanced scroll-triggered animations with IntersectionObserver
+    (function() {
+      // Respect reduced motion preference
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      if (prefersReducedMotion) {
+        document.querySelectorAll('[data-animate]').forEach(el => {
+          el.classList.add('animate-visible');
+        });
+        return;
+      }
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const staggerIndex = parseInt(el.dataset.animateStagger || '0', 10);
+            const delay = staggerIndex * 80; // 80ms stagger
+            
+            setTimeout(() => {
+              el.classList.add('animate-visible');
+            }, delay);
+            
+            observer.unobserve(el);
+          }
+        });
+      }, { 
+        threshold: 0.1, 
+        rootMargin: '0px 0px -30px 0px' 
       });
-    }, { threshold: 0.1, rootMargin: '50px' });
 
-    document.querySelectorAll('[data-animate]').forEach(el => {
-      el.classList.add('transition-all', 'duration-700', 'ease-out', 'opacity-0', 'translate-y-8');
-      observer.observe(el);
-    });
+      // Add stagger indices to sibling animated elements
+      const processedParents = new Set();
+      document.querySelectorAll('[data-animate]').forEach(el => {
+        const parent = el.parentElement;
+        if (parent && !processedParents.has(parent)) {
+          const siblings = parent.querySelectorAll(':scope > [data-animate]');
+          siblings.forEach((sibling, index) => {
+            (sibling as HTMLElement).dataset.animateStagger = index.toString();
+          });
+          processedParents.add(parent);
+        }
+        observer.observe(el);
+      });
+    })();
   </script>
 </body>
 </html>

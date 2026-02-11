@@ -2,11 +2,41 @@ import { supabase } from '../lib/supabase';
 // @ts-ignore
 import data from '../data/data.json';
 
-export const migrateData = async (userId: string) => {
+interface MigrationResult {
+  success: boolean;
+  error?: any;
+  alreadyCompleted?: boolean;
+}
+
+export const checkMigrationStatus = async (): Promise<{ status: string; migrated_at?: string; migrated_by?: string }> => {
+  try {
+    const { data, error } = await supabase.rpc('check_migration_status');
+    if (error) {
+      console.warn('Migration status check failed:', error);
+      return { status: 'PENDING' };
+    }
+    return data || { status: 'PENDING' };
+  } catch (e) {
+    return { status: 'PENDING' };
+  }
+};
+
+export const migrateData = async (userId: string): Promise<MigrationResult> => {
   console.log('Starting migration for user:', userId);
 
   try {
-    // 1. Profile
+    // 1. Check if migration already completed
+    const migrationStatus = await checkMigrationStatus();
+    if (migrationStatus.status === 'COMPLETED') {
+      console.warn('Migration already completed. Blocking re-run.');
+      return { 
+        success: false, 
+        alreadyCompleted: true,
+        error: 'Migration has already been completed and cannot be run again.'
+      };
+    }
+
+    // 2. Profile
     const profileData = {
       user_id: userId,
       name: data.personal.name,
@@ -194,6 +224,22 @@ export const migrateData = async (userId: string) => {
       }));
       const { error } = await (supabase as any).from('learning_draft').insert(items);
       if (error) throw error;
+    }
+
+    // 3. Mark migration as completed
+    try {
+      const { data: completionResult, error: completionError } = await supabase.rpc('set_migration_completed', {
+        p_user_id: userId
+      });
+      
+      if (completionError) {
+        console.warn('Failed to mark migration as completed:', completionError);
+        // Don't fail the migration, just log
+      } else {
+        console.log('Migration marked as completed:', completionResult);
+      }
+    } catch (e) {
+      console.warn('Migration completion tracking not available:', e);
     }
 
     return { success: true };

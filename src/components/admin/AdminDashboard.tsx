@@ -91,7 +91,16 @@ interface Education {
   sort_order: number;
 }
 
-type TabType = 'profile' | 'experience' | 'education' | 'certifications' | 'skills' | 'projects' | 'tools';
+interface Learning {
+  id?: string;
+  name: string;
+  description: string;
+  status: string;
+  visible: boolean;
+  sort_order: number;
+}
+
+type TabType = 'profile' | 'experience' | 'education' | 'certifications' | 'skills' | 'projects' | 'tools' | 'learning';
 
 export function AdminDashboard() {
   return (
@@ -108,6 +117,7 @@ function AdminDashboardContent() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [saving, setSaving] = useState(false);
+  const [migrationCompleted, setMigrationCompleted] = useState(false);
   
   const { success, error: showError } = useToast();
 
@@ -116,6 +126,20 @@ function AdminDashboardContent() {
     if (type === 'success') success('Success', message);
     else showError('Error', message);
   };
+
+  // Check migration status on mount
+  useEffect(() => {
+    const checkMigration = async () => {
+      try {
+        const res = await fetch('/api/admin/migration-status');
+        const data = await res.json();
+        setMigrationCompleted(data?.status === 'COMPLETED');
+      } catch (e) {
+        // Ignore - migration status check is optional
+      }
+    };
+    checkMigration();
+  }, []);
 
   // Data states
   const [profile, setProfile] = useState<Profile>({
@@ -137,6 +161,7 @@ function AdminDashboardContent() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
+  const [learning, setLearning] = useState<Learning[]>([]);
 
   // Auto-logout: 30 min inactivity, tab close, navigation
   useAutoLogout({
@@ -192,7 +217,7 @@ function AdminDashboardContent() {
   const loadAllData = async (userId: string) => {
     // Normal Supabase loading
     try {
-      const [profileRes, expRes, certRes, skillRes, projRes, toolsRes, eduRes] = await Promise.all([
+      const [profileRes, expRes, certRes, skillRes, projRes, toolsRes, eduRes, learnRes] = await Promise.all([
         (supabase.from('profiles_draft' as any) as any).select('*').eq('user_id', userId).single(),
         (supabase.from('experiences_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
         (supabase.from('certifications_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
@@ -200,6 +225,7 @@ function AdminDashboardContent() {
         (supabase.from('projects_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
         (supabase.from('tools_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
         (supabase.from('education_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
+        (supabase.from('learning_draft' as any) as any).select('*').eq('user_id', userId).order('sort_order'),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data as unknown as Profile);
@@ -209,6 +235,7 @@ function AdminDashboardContent() {
       if (projRes.data) setProjects(projRes.data as unknown as Project[]);
       if (toolsRes.data) setTools(toolsRes.data as unknown as Tool[]);
       if (eduRes.data) setEducation(eduRes.data as unknown as Education[]);
+      if (learnRes.data) setLearning(learnRes.data as unknown as Learning[]);
     } catch (error) {
       console.error('Error loading data:', error);
       showToast('error', 'Failed to load data. Please refresh.');
@@ -710,6 +737,71 @@ function AdminDashboardContent() {
     }
   };
 
+  // Add new learning topic
+  const addLearning = () => {
+    setLearning([
+      ...learning,
+      {
+        name: '',
+        description: '',
+        status: 'in-progress',
+        visible: true,
+        sort_order: learning.length,
+      },
+    ]);
+  };
+
+  // Save learning topic
+  const saveLearning = async (item: Learning, index: number) => {
+    if (!user) return;
+    setSaving(true);
+
+    try {
+      const { data: apiData, error } = await apiCall<{ message: string; data: Learning }>('/api/admin/draft', {
+        method: 'PUT',
+        body: JSON.stringify({ table: 'learning', data: item }),
+      });
+
+      if (error) throw error;
+      const data = apiData?.data;
+      
+      if (!data) throw new Error('No data returned from API');
+
+      const updated = [...learning];
+      updated[index] = data;
+      setLearning(updated);
+      showToast('success', 'Learning topic saved!');
+    } catch (error: any) {
+      showToast('error', error.message || 'Failed to save learning topic');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete learning topic
+  const deleteLearning = async (item: Learning, index: number) => {
+    if (!confirm('Delete this learning topic?')) return;
+
+    setSaving(true);
+
+    try {
+      if (item.id) {
+        const { error } = await apiCall('/api/admin/draft', {
+          method: 'DELETE',
+          body: JSON.stringify({ table: 'learning', id: item.id }),
+        });
+        if (error) throw error;
+      }
+
+      setLearning(learning.filter((_, i) => i !== index));
+      showToast('success', 'Learning topic deleted!');
+    } catch (error: any) {
+      showToast('error', error.message || 'Failed to delete learning topic');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -726,6 +818,7 @@ function AdminDashboardContent() {
     { id: 'skills', label: 'Skills', icon: '🛠️' },
     { id: 'projects', label: 'Projects', icon: '📁' },
     { id: 'tools', label: 'Tools', icon: '🔧' },
+    { id: 'learning', label: 'Learning', icon: '📚' },
   ];
 
   return (
@@ -751,37 +844,56 @@ function AdminDashboardContent() {
             >
               Logout
             </button>
-            <button
-              onClick={async () => {
-                if (!user) return;
-                if (!confirm('This will wipe existing data and re-seed from static JSON. Continue?')) return;
-                setLoading(true);
-                const res = await migrateData(user.id);
-                if (res.success) {
-                  showToast('success', 'Migration complete! Reloading...');
-                  window.location.reload();
-                } else {
-                  showToast('error', 'Migration failed. Check console.');
-                  setLoading(false);
-                }
-              }}
-              className="px-4 py-2 text-sm bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 rounded-lg hover:border-indigo-500/50 transition-all"
+            <a
+              href="/admin/preview"
+              target="_blank"
+              className="px-4 py-2 text-sm bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/30 rounded-lg hover:border-amber-500/50 transition-all"
             >
-              ⚡ Migrate Data
-            </button>
+              👁 Preview
+            </a>
+            {!migrationCompleted && (
+              <button
+                onClick={async () => {
+                  if (!user) return;
+                  if (!confirm('This will seed initial data from static JSON. This action can only be performed ONCE. Continue?')) return;
+                  setLoading(true);
+                  const res = await migrateData(user.id);
+                  if (res.success) {
+                    setMigrationCompleted(true);
+                    showToast('success', 'Migration complete! Reloading...');
+                    window.location.reload();
+                  } else if (res.alreadyCompleted) {
+                    setMigrationCompleted(true);
+                    showToast('error', 'Migration was already completed.');
+                    setLoading(false);
+                  } else {
+                    showToast('error', 'Migration failed. Check console.');
+                    setLoading(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 rounded-lg hover:border-indigo-500/50 transition-all"
+              >
+                ⚡ Migrate Data
+              </button>
+            )}
+            {migrationCompleted && (
+              <span className="px-4 py-2 text-sm bg-slate-500/20 text-slate-500 border border-slate-500/30 rounded-lg cursor-not-allowed" title="Migration already completed">
+                ✓ Migrated
+              </span>
+            )}
             <button
               onClick={async () => {
                 if (!confirm('This will publish ALL drafts to the live site. Continue?')) return;
                 setSaving(true);
                 const { error } = await apiCall('/api/admin/publish', { method: 'POST' });
                 if (error) showToast('error', error.message || 'Publish failed');
-                else showToast('success', 'Published successfully!');
+                else showToast('success', 'Published successfully! Live site updated.');
                 setSaving(false);
               }}
               disabled={saving}
-              className="px-4 py-2 text-sm bg-green-500/20 text-green-400 hover:text-green-300 border border-green-500/30 rounded-lg hover:border-green-500/50 transition-all font-semibold"
+              className="px-4 py-2 text-sm bg-green-500/20 text-green-400 hover:text-green-300 border border-green-500/30 rounded-lg hover:border-green-500/50 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              rocket Publish Changes
+              {saving ? '⏳ Publishing...' : '🚀 Publish Changes'}
             </button>
           </div>
         </div>
@@ -1670,6 +1782,79 @@ function AdminDashboardContent() {
                           <span className="text-slate-400 text-sm">Visible</span>
                         </label>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Learning Tab */}
+            {activeTab === 'learning' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Currently Learning</h2>
+                  <button onClick={addLearning} className="btn-primary">
+                    + Add Topic
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {learning.map((item, index) => (
+                    <div key={item.id || index} className="glass-card p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-medium">{item.name || 'New Topic'}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveLearning(item, index)}
+                            className="px-3 py-1 text-xs bg-accent/20 text-accent rounded-lg hover:bg-accent/30"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => deleteLearning(item, index)}
+                            className="px-3 py-1 text-xs bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(e) => {
+                          const updated = [...learning];
+                          updated[index].name = e.target.value;
+                          setLearning(updated);
+                        }}
+                        placeholder="Topic name (e.g., Prompt Engineering)"
+                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent"
+                      />
+
+                      <textarea
+                        value={item.description}
+                        onChange={(e) => {
+                          const updated = [...learning];
+                          updated[index].description = e.target.value;
+                          setLearning(updated);
+                        }}
+                        placeholder="Description (optional)"
+                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent resize-none h-16"
+                      />
+
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={item.visible}
+                          onChange={(e) => {
+                            const updated = [...learning];
+                            updated[index].visible = e.target.checked;
+                            setLearning(updated);
+                          }}
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-accent"
+                        />
+                        <span className="text-slate-400 text-sm">Visible</span>
+                      </label>
                     </div>
                   ))}
                 </div>

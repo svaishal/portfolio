@@ -12,44 +12,111 @@ if (!user) {
   return Astro.redirect('/admin');
 }
 
+// Get viewport parameter
+const url = new URL(Astro.request.url);
+const viewport = url.searchParams.get('viewport') || 'desktop';
+
 // Fetch DRAFT data
 const data = await getPortfolioData(supabase, true);
 const profile = data.profile;
+
+// Viewport widths for iframe preview
+const viewportWidths: Record<string, string> = {
+  mobile: '375px',
+  tablet: '768px',
+  desktop: '100%'
+};
 ---
 
 {profile ? (
   <Layout
-    title="Preview Results"
+    title="Preview - Draft"
     description={profile.tagline || 'Portfolio Preview'}
     profileData={data}
   >
-    <!-- Preview Banner -->
-    <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500/90 text-amber-950 px-6 py-3 text-center font-bold flex justify-between items-center backdrop-blur-md shadow-lg">
-      <div class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-        </svg>
-        <span>PREVIEW MODE — Viewing unpublished drafts</span>
+    <!-- Preview Toolbar -->
+    <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-amber-950 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+          <span class="font-bold">PREVIEW MODE</span>
+          <span class="text-amber-800 text-sm">Viewing unpublished drafts</span>
+        </div>
+        
+        <!-- Viewport Switcher -->
+        <div class="flex items-center gap-2">
+          <div class="flex bg-amber-600/30 rounded-lg p-1 gap-1">
+            <a 
+              href="?viewport=mobile"
+              class={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewport === 'mobile' ? 'bg-amber-700 text-white' : 'hover:bg-amber-600/50'}`}
+              title="Mobile (375px)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </a>
+            <a 
+              href="?viewport=tablet"
+              class={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewport === 'tablet' ? 'bg-amber-700 text-white' : 'hover:bg-amber-600/50'}`}
+              title="Tablet (768px)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </a>
+            <a 
+              href="?viewport=desktop"
+              class={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewport === 'desktop' ? 'bg-amber-700 text-white' : 'hover:bg-amber-600/50'}`}
+              title="Desktop (Full)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <a 
+            href="/" 
+            target="_blank"
+            class="text-sm hover:underline"
+          >
+            View Live Site →
+          </a>
+          <a 
+            href="/admin/dashboard" 
+            class="bg-amber-700 hover:bg-amber-800 text-white px-4 py-1.5 rounded-lg text-sm transition-all font-semibold"
+          >
+            Exit Preview
+          </a>
+        </div>
       </div>
-      <a 
-        href="/admin/dashboard" 
-        class="bg-black/10 hover:bg-black/20 px-4 py-1.5 rounded-lg text-sm transition-all border border-black/5 font-semibold"
-      >
-        Exit Preview
-      </a>
     </div>
 
-    <!-- Content Wrapper with Padding for Banner -->
-    <div class="pt-12">
-      <PortfolioHome data={data} />
+    <!-- Preview Content -->
+    <div class="pt-14 min-h-screen bg-[#1a1a1a] flex justify-center">
+      <div 
+        class={`bg-background transition-all duration-300 ${viewport !== 'desktop' ? 'shadow-2xl' : ''}`}
+        style={`width: ${viewportWidths[viewport]}; max-width: 100%;`}
+      >
+        <PortfolioHome data={data} />
+      </div>
     </div>
   </Layout>
 ) : (
   <Layout title="Empty Preview">
-    <div class="min-h-screen flex items-center justify-center bg-[#0a0a0f] text-white">
+    <div class="min-h-screen flex items-center justify-center bg-background text-white">
       <div class="text-center p-8 glass-card max-w-md">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
         <h1 class="text-2xl font-bold mb-4">Draft Data Empty</h1>
-        <p class="text-slate-400 mb-6">No draft data found to preview. Please save some changes in the dashboard first.</p>
+        <p class="text-text-muted mb-6">No draft data found to preview. Please save some changes in the dashboard first.</p>
         <a href="/admin/dashboard" class="btn-primary inline-flex">Go to Dashboard</a>
       </div>
     </div>

@@ -17,7 +17,28 @@ export default defineConfig({
     assets: '_assets'
   },
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    build: {
+      // Code-splitting optimization
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Split React runtime
+            'react-vendor': ['react', 'react-dom'],
+            // Split Supabase
+            'supabase-vendor': ['@supabase/supabase-js', '@supabase/ssr'],
+            // Split Framer Motion (if used)
+            'motion': ['framer-motion'],
+          }
+        }
+      },
+      // Increase chunk size warning limit
+      chunkSizeWarningLimit: 500,
+    },
+    // Optimize deps pre-bundling
+    optimizeDeps: {
+      include: ['react', 'react-dom', '@supabase/supabase-js'],
+    }
   },
   security: {
     checkOrigin: true
