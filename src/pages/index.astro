@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PortfolioHome from '../components/PortfolioHome.astro';
-import { getPortfolioData } from '../lib/data';
+import { useProfileData } from '../hooks/useProfileData';
 
 // ... existing imports ...
 
 // Fetch portfolio data
-const data = await getPortfolioData();
+const data = await useProfileData();
 const profile = data.profile;
 // const githubUrl... (moved to PortfolioHome, not needed here unless used in Layout?)
 // Layout takes profileData={data}.

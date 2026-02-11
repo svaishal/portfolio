@@ -8,97 +8,20 @@ import { apiCall } from '../../utils/api';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { ToastProvider, useToast } from '../../hooks/useToast';
 
-// Types
-interface Profile {
-  id?: string;
-  name: string;
-  role: string;
-  tagline: string;
-  subtitle: string;
-  location: string;
-  years_experience: string;
-  bio: string;
-  about_intro: string;
-  about_values: string;
-  open_to_work: boolean;
-  profile_photo_url: string | null;
-}
+// Import types from shared data layer
+import type {
+  Profile,
+  Experience,
+  Certification,
+  Skill,
+  Project,
+  Tool,
+  Education,
+  Learning,
+} from '../../lib/data';
 
-interface Experience {
-  id?: string;
-  company: string;
-  role: string;
-  period: string;
-  type: string;
-  icon: string;
-  achievements: string[];
-  skills: string[];
-  is_current: boolean;
-  sort_order: number;
-  visible: boolean;
-}
-
-interface Certification {
-  id?: string;
-  name: string;
-  icon: string;
-  issuer: string | null;
-  date: string | null;
-  url: string | null;
-  visible: boolean;
-  sort_order: number;
-}
-
-interface Skill {
-  id?: string;
-  name: string;
-  category: 'technical' | 'soft';
-  visible: boolean;
-  sort_order: number;
-}
-
-interface Project {
-  id?: string;
-  title: string;
-  description: string;
-  category: string;
-  icon: string;
-  highlights: string[];
-  impact: string;
-  image_url: string | null;
-  link: string | null;
-  visible: boolean;
-  sort_order: number;
-}
-
-interface Tool {
-  id?: string;
-  name: string;
-  category: string;
-  description: string;
-  icon: string;
-  visible: boolean;
-  sort_order: number;
-}
-
-interface Education {
-  id?: string;
-  degree: string;
-  institution: string;
-  field: string;
-  year: string;
-  visible: boolean;
-  sort_order: number;
-}
-
-interface Learning {
-  id?: string;
-  name: string;
-  description: string;
-  status: string;
-  visible: boolean;
-  sort_order: number;
-}
+// Admin-specific type extensions (adds draft-specific fields)
+// Interfaces removed in favor of shared types in src/lib/data.ts
 
 type TabType = 'profile' | 'experience' | 'education' | 'certifications' | 'skills' | 'projects' | 'tools' | 'learning';
 

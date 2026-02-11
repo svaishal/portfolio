@@ -1,11 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getPortfolioData, getInitials } from '../lib/data';
-import ToolCard from '../components/ToolCard.astro';
-import LearningCard from '../components/LearningCard.astro';
+import { getInitials } from '../lib/data';
+import { useProfileData } from '../hooks/useProfileData';
+
+import CertificationCard from '../components/CertificationCard.astro';
+import StatsCard from '../components/StatsCard.astro';
 
 // Fetch portfolio data
-const data = await getPortfolioData();
+const data = await useProfileData();
 const profile = data.profile;
 ---
 
@@ -170,25 +172,7 @@ const profile = data.profile;
     </div>
   </section>
 
-  <!-- Tools & Applications Section -->
-  <section class="py-20 px-6 relative">
-    <div class="max-w-6xl mx-auto">
-      <div class="text-center mb-16" data-animate>
-        <p class="section-title">Tech Stack</p>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">Tools & Applications</h2>
-      </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-animate>
-        {data.tools.map((tool) => (
-          <ToolCard 
-            name={tool.name} 
-            description={tool.description}
-            icon={tool.icon}
-          />
-        ))}
-      </div>
-    </div>
-  </section>
 
   <!-- Currently Learning Section -->
   <section class="py-20 px-6 relative">
@@ -198,14 +182,15 @@ const profile = data.profile;
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Currently Learning</h2>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" data-animate>
-        {data.learning.map((item) => (
-          <LearningCard 
-            name={item.name} 
-            description={item.description}
-            status={item.status}
-          />
-        ))}
+      <div class="glass-card p-12 bg-surface/50 border-white/5" data-animate>
+        <StatsCard
+          stats={[
+            { value: '99.5%', label: 'Uptime Achieved', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' },
+            { value: '30%', label: 'Faster Response', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' },
+            { value: '40%', label: 'Fewer Tickets', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' },
+            { value: '95%+', label: 'Satisfaction', valueClass: 'text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white mb-2' }
+          ]}
+        />
       </div>
     </div>
   </section>
@@ -252,10 +237,7 @@ const profile = data.profile;
           </div>
           <div class="space-y-3">
             {data.certifications.slice(0, 6).map((cert) => (
-              <div class="flex items-center gap-4 p-4 bg-surface rounded-xl border border-white/5 hover:border-primary/30 transition-all">
-                <span class="text-3xl bg-white/5 p-2 rounded-lg">{cert.icon}</span>
-                <span class="text-text-main font-medium">{cert.name}</span>
-              </div>
+              <CertificationCard name={cert.name} icon={cert.icon} variant="horizontal" />
             ))}
           </div>
         </div>

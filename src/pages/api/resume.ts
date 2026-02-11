@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getPortfolioData } from '../../lib/data';
+import { useProfileData } from '../../hooks/useProfileData';
 
 // ✅ FIX: Resume endpoint should NOT require authentication
 // It uses public portfolio data only (fallback or public Supabase queries)
@@ -7,7 +7,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   try {
     // Use the same public data function that powers the main site
-    const data = await getPortfolioData();
+    const data = await useProfileData({ cacheKey: 'resume-live' });
 
     if (!data.profile) {
       console.error('[DEBUG] Resume API: No profile data found');

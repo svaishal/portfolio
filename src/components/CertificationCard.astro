@@ -1,0 +1,21 @@
+---
+interface Props {
+  name: string;
+  icon: string;
+  variant?: 'vertical' | 'horizontal';
+}
+
+const { name, icon, variant = 'vertical' } = Astro.props;
+---
+
+{variant === 'vertical' ? (
+  <div class="glass-card p-6 text-center hover:border-accent/30 transition-all duration-300 hover:-translate-y-1 group">
+    <span class="text-4xl mb-4 block">{icon}</span>
+    <h3 class="text-white font-medium group-hover:text-accent transition-colors">{name}</h3>
+  </div>
+) : (
+  <div class="flex items-center gap-4 p-4 bg-surface rounded-xl border border-white/5 hover:border-primary/30 transition-all">
+    <span class="text-3xl bg-white/5 p-2 rounded-lg">{icon}</span>
+    <span class="text-text-main font-medium">{name}</span>
+  </div>
+)}

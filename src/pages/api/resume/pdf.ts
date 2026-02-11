@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import { getPortfolioData } from '../../../lib/data';
+import { useProfileData } from '../../../hooks/useProfileData';
 
 /**
  * Server-side PDF Resume Generation
@@ -15,7 +15,7 @@ import { getPortfolioData } from '../../../lib/data';
 export const GET: APIRoute = async ({ request }) => {
   try {
     // Fetch ONLY live data (published content)
-    const data = await getPortfolioData(undefined, false);
+    const data = await useProfileData({ cacheKey: 'resume-pdf-live' });
 
     if (!data.profile) {
       return new Response(JSON.stringify({ 

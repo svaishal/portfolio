@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PortfolioHome from '../../components/PortfolioHome.astro';
-import { getPortfolioData } from '../../lib/data';
+import { useProfileData } from '../../hooks/useProfileData';
 import { createSupabaseServerClient } from '../../lib/supabase-server';
 
 // Server-side auth check
@@ -17,7 +17,7 @@ const url = new URL(Astro.request.url);
 const viewport = url.searchParams.get('viewport') || 'desktop';
 
 // Fetch DRAFT data
-const data = await getPortfolioData(supabase, true);
+const data = await useProfileData({ client: supabase, useDraft: true, cacheKey: 'draft-preview' });
 const profile = data.profile;
 
 // Viewport widths for iframe preview

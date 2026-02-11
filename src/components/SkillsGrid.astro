@@ -1,0 +1,24 @@
+---
+interface Props {
+  skills: {
+    name: string;
+  }[];
+  limit?: number;
+  delayMultiplier?: number;
+}
+
+const { skills, limit, delayMultiplier = 50 } = Astro.props;
+
+const displaySkills = limit ? skills.slice(0, limit) : skills;
+---
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-animate>
+  {displaySkills.map((skill, index) => (
+    <div 
+      class="glass-card p-6 text-center hover:border-primary/30 transition-all duration-300 hover:-translate-y-2 group"
+      style={`transition-delay: ${index * delayMultiplier}ms`}
+    >
+      <p class="text-text-main font-medium group-hover:text-primary transition-colors">{skill.name}</p>
+    </div>
+  ))}
+</div>

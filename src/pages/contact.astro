@@ -1,9 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getPortfolioData, getSocialUrl } from '../lib/data';
+import { getSocialUrl } from '../lib/data';
+import { useProfileData } from '../hooks/useProfileData';
 
 // Fetch portfolio data
-const data = await getPortfolioData();
+const data = await useProfileData();
 const profile = data.profile;
 const githubUrl = getSocialUrl(data.socialLinks, 'github');
 const linkedinUrl = getSocialUrl(data.socialLinks, 'linkedin');

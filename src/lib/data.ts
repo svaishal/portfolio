@@ -2,7 +2,7 @@ import { supabase, isSupabaseConfigured } from './supabase';
 
 // Type definitions for fetched data
 export interface Profile {
-  id: string;
+  id?: string;
   name: string;
   role: string;
   tagline: string;
@@ -17,7 +17,7 @@ export interface Profile {
 }
 
 export interface Experience {
-  id: string;
+  id?: string;
   company: string;
   role: string;
   period: string;
@@ -27,25 +27,30 @@ export interface Experience {
   skills: string[];
   is_current: boolean;
   sort_order: number;
+  visible?: boolean;
 }
 
 export interface Certification {
-  id: string;
+  id?: string;
   name: string;
   icon: string;
   issuer: string | null;
   date: string | null;
   url: string | null;
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface Skill {
-  id: string;
+  id?: string;
   name: string;
   category: 'technical' | 'soft';
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface Project {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   category: string;
@@ -54,42 +59,53 @@ export interface Project {
   impact: string;
   image_url: string | null;
   link: string | null;
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface JourneyPhase {
-  id: string;
+  id?: string;
   phase: string;
   description: string;
   sort_order: number;
+  visible?: boolean;
 }
 
 export interface Education {
-  id: string;
+  id?: string;
   degree: string;
   institution: string;
   field: string;
   year: string;
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface SocialLink {
-  id: string;
+  id?: string;
   platform: string;
   url: string;
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface Tool {
-  id: string;
+  id?: string;
   name: string;
   category: string;
   description: string;
   icon: string;
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface Learning {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   status: string;
+  visible?: boolean;
+  sort_order?: number;
 }
 
 export interface PortfolioData {
